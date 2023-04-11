@@ -1,0 +1,44 @@
+---
+tags: [2nde/00-Docs]
+title: Étude de fonctions
+created: '2022-08-17T12:13:16.588Z'
+modified: '2022-08-17T12:20:35.761Z'
+---
+
+
+Étude de fonctions
+==================
+
+*   [contenu](#content)
+*   [menu](#menu)
+*   [navigation](#navigation)
+*   [outils](#tools)
+
+* * *
+
+La fonction racine carrée
+-------------------------
+
+### _Définition_ : Fonction carré
+
+La fonction définie sur \\(\[0 ;+\\infty\[\\), qui à tout nombre réel \\(x\\) positif associe sa racine carrée \\(\\sqrt x\\), est appelée **fonction racine carrée**.
+
+### _Fondamental_ : Propriété 1
+
+La fonction \\(f :x \\longmapsto \\sqrt x\\) est strictement croissante sur l'intervalle \\(\[0 ;+\\infty\[\\).
+
+![](../res/im-tab-var-rac-carree.png)
+
+Tableau des variations de la fonction racine carrée
+
+### _Définition_ : Représentation graphique
+
+Dans un repère orthogonal d'origine O, la représentation graphique de la fonction **racine carrée** est une demi-parabole couchée :
+
+![](../res/im_repre_graph_rac.png)
+
+### _Complément_ :
+
+
+
+
