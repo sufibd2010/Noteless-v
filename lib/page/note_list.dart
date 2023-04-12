@@ -39,8 +39,7 @@ class _NoteListPageState extends State<NoteListPage> {
 
   @override
   void initState() {
-    store.currTag =
-        widget.filterTag ?? PrefService.getString('current_tag') ?? '';
+    store.currTag = widget.filterTag ?? PrefService.getString('current_tag') ?? '';
 
     if (widget.searchText != null) {
       _searchFieldCtrl.text = widget.searchText;
@@ -58,10 +57,7 @@ class _NoteListPageState extends State<NoteListPage> {
           }
         });
         quickActions.setShortcutItems(<ShortcutItem>[
-          const ShortcutItem(
-              type: 'action_create_note',
-              localizedTitle: 'Create note',
-              icon: 'ic_shortcut_add'),
+          const ShortcutItem(type: 'action_create_note', localizedTitle: 'Create note', icon: 'ic_shortcut_add'),
         ]);
 
         // For sharing or opening urls/text coming from outside the app while the app is in the memory
@@ -97,8 +93,7 @@ class _NoteListPageState extends State<NoteListPage> {
         context: context,
         builder: (context) => AlertDialog(
               title: Text('Received text'),
-              content:
-                  Scrollbar(child: SingleChildScrollView(child: Text(value))),
+              content: Scrollbar(child: SingleChildScrollView(child: Text(value))),
               actions: [
                 TextButton(
                     onPressed: () {
@@ -253,7 +248,7 @@ class _NoteListPageState extends State<NoteListPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text('Skolarbook'),
+                      Text('SkolarBook(2ndGrade)'),
                       if (store.currentTag.length > 0)
                         Text(
                           store.currentTag,
@@ -306,8 +301,7 @@ class _NoteListPageState extends State<NoteListPage> {
                         LinearProgressIndicator(),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child:
-                              Text('Syncing with ${store.syncMethodName}...'),
+                          child: Text('Syncing with ${store.syncMethodName}...'),
                         ),
                         Container(
                           height: 1,
@@ -321,8 +315,7 @@ class _NoteListPageState extends State<NoteListPage> {
                               width: 16,
                             ),
                             DropdownButton(
-                              value:
-                                  PrefService.getString('sort_key') ?? 'title',
+                              value: PrefService.getString('sort_key') ?? 'title',
                               underline: Container(),
                               onChanged: (key) {
                                 PrefService.setString('sort_key', key);
@@ -348,18 +341,14 @@ class _NoteListPageState extends State<NoteListPage> {
                             ),
                             InkWell(
                               child: Icon(
-                                (PrefService.getBool('sort_direction_asc') ??
-                                        true)
+                                (PrefService.getBool('sort_direction_asc') ?? true)
                                     ? Icons.keyboard_arrow_down
                                     : Icons.keyboard_arrow_up,
                                 size: 32,
                               ),
                               onTap: () {
                                 PrefService.setBool(
-                                    'sort_direction_asc',
-                                    !(PrefService.getBool(
-                                            'sort_direction_asc') ??
-                                        true));
+                                    'sort_direction_asc', !(PrefService.getBool('sort_direction_asc') ?? true));
 
                                 _filterAndSortNotes();
                               },
@@ -399,27 +388,20 @@ class _NoteListPageState extends State<NoteListPage> {
                                       onTap: () async {
                                         if (await showDialog(
                                                 context: context,
-                                                builder: (context) =>
-                                                    AlertDialog(
-                                                      title: Text(
-                                                          'Do you really want to delete this note?'),
-                                                      content: Text(
-                                                          'This will delete it permanently.'),
+                                                builder: (context) => AlertDialog(
+                                                      title: Text('Do you really want to delete this note?'),
+                                                      content: Text('This will delete it permanently.'),
                                                       actions: <Widget>[
                                                         TextButton(
                                                           child: Text('Cancel'),
                                                           onPressed: () {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop(false);
+                                                            Navigator.of(context).pop(false);
                                                           },
                                                         ),
                                                         TextButton(
                                                           child: Text('Delete'),
                                                           onPressed: () {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop(true);
+                                                            Navigator.of(context).pop(true);
                                                           },
                                                         )
                                                       ],
@@ -463,9 +445,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                   IconSlideAction(
                                     caption: note.favorited ? 'Unstar' : 'Star',
                                     color: Colors.yellow,
-                                    icon: note.favorited
-                                        ? MdiIcons.starOff
-                                        : MdiIcons.star,
+                                    icon: note.favorited ? MdiIcons.starOff : MdiIcons.star,
                                     onTap: () async {
                                       note.favorited = !note.favorited;
 
@@ -477,9 +457,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                   IconSlideAction(
                                     caption: note.pinned ? 'Unpin' : 'Pin',
                                     color: Colors.green,
-                                    icon: note.pinned
-                                        ? MdiIcons.pinOff
-                                        : MdiIcons.pin,
+                                    icon: note.pinned ? MdiIcons.pinOff : MdiIcons.pin,
                                     onTap: () async {
                                       note.pinned = !note.pinned;
 
@@ -493,14 +471,12 @@ class _NoteListPageState extends State<NoteListPage> {
                                   selected: _selectedNotes.contains(note.title),
                                   title: Text(note.title),
                                   subtitle: store.isDendronModeEnabled
-                                      ? Text(note.file.path.substring(
-                                          store.notesDir.path.length + 1))
+                                      ? Text(note.file.path.substring(store.notesDir.path.length + 1))
                                       : null,
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: <Widget>[
-                                      if (note.attachments.isNotEmpty)
-                                        Icon(MdiIcons.paperclip),
+                                      if (note.attachments.isNotEmpty) Icon(MdiIcons.paperclip),
                                       if (note.favorited) Icon(MdiIcons.star),
                                       if (note.pinned) Icon(MdiIcons.pin),
                                       if (note.tags.contains('color/red'))
@@ -528,8 +504,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                   onTap: () async {
                                     if (_selectedNotes.isNotEmpty) {
                                       setState(() {
-                                        if (_selectedNotes
-                                            .contains(note.title)) {
+                                        if (_selectedNotes.contains(note.title)) {
                                           _selectedNotes.remove(note.title);
                                         } else {
                                           _selectedNotes.add(note.title);
@@ -581,8 +556,7 @@ class _NoteListPageState extends State<NoteListPage> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text(
-                                '${_selectedNotes.length} note${_selectedNotes.length > 1 ? 's' : ''} selected'),
+                            Text('${_selectedNotes.length} note${_selectedNotes.length > 1 ? 's' : ''} selected'),
                             Row(
                               children: <Widget>[
                                 InkWell(
@@ -627,8 +601,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                           ListTile(
                                             leading: Icon(MdiIcons.star),
                                             title: Text('Favorite selected'),
-                                            onTap: () =>
-                                                _modifyAll((Note note) async {
+                                            onTap: () => _modifyAll((Note note) async {
                                               note.favorited = true;
 
                                               PersistentStore.saveNote(note);
@@ -637,8 +610,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                           ListTile(
                                             leading: Icon(MdiIcons.starOff),
                                             title: Text('Unfavorite selected'),
-                                            onTap: () =>
-                                                _modifyAll((Note note) async {
+                                            onTap: () => _modifyAll((Note note) async {
                                               note.favorited = false;
                                               PersistentStore.saveNote(note);
                                             }),
@@ -662,8 +634,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                           ListTile(
                                             leading: Icon(MdiIcons.pin),
                                             title: Text('Pin selected'),
-                                            onTap: () =>
-                                                _modifyAll((Note note) async {
+                                            onTap: () => _modifyAll((Note note) async {
                                               note.pinned = true;
                                               PersistentStore.saveNote(note);
                                             }),
@@ -671,8 +642,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                           ListTile(
                                             leading: Icon(MdiIcons.pinOff),
                                             title: Text('Unpin selected'),
-                                            onTap: () =>
-                                                _modifyAll((Note note) async {
+                                            onTap: () => _modifyAll((Note note) async {
                                               note.pinned = false;
                                               PersistentStore.saveNote(note);
                                             }),
@@ -695,55 +665,42 @@ class _NoteListPageState extends State<NoteListPage> {
                                         children: <Widget>[
                                           ListTile(
                                             leading: Icon(MdiIcons.tagPlus),
-                                            title: Text(
-                                                'Add Tag to selected notes'),
+                                            title: Text('Add Tag to selected notes'),
                                             onTap: () async {
                                               /* 
                                                     Navigator.of(context).pop(); */
-                                              TextEditingController ctrl =
-                                                  TextEditingController();
+                                              TextEditingController ctrl = TextEditingController();
                                               String newTag = await showDialog(
                                                   context: context,
-                                                  builder: (context) =>
-                                                      AlertDialog(
+                                                  builder: (context) => AlertDialog(
                                                         title: Text('Add Tag'),
                                                         content: TextField(
                                                           controller: ctrl,
                                                           autofocus: true,
                                                           onSubmitted: (str) {
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop(str);
+                                                            Navigator.of(context).pop(str);
                                                           },
                                                         ),
                                                         actions: <Widget>[
                                                           TextButton(
-                                                            child:
-                                                                Text('Cancel'),
+                                                            child: Text('Cancel'),
                                                             onPressed: () {
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
+                                                              Navigator.of(context).pop();
                                                             },
                                                           ),
                                                           TextButton(
                                                             child: Text('Add'),
                                                             onPressed: () {
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop(ctrl
-                                                                      .text);
+                                                              Navigator.of(context).pop(ctrl.text);
                                                             },
                                                           ),
                                                         ],
                                                       ));
                                               if ((newTag ?? '').length > 0) {
                                                 print('ADD');
-                                                await _modifyAll(
-                                                    (Note note) async {
+                                                await _modifyAll((Note note) async {
                                                   note.tags.add(newTag);
-                                                  PersistentStore.saveNote(
-                                                      note);
+                                                  PersistentStore.saveNote(note);
                                                 });
                                                 store.updateTagList();
                                               } else {
@@ -754,63 +711,45 @@ class _NoteListPageState extends State<NoteListPage> {
                                           ),
                                           ListTile(
                                             leading: Icon(MdiIcons.tagMinus),
-                                            title: Text(
-                                                'Remove Tag from selected notes'),
+                                            title: Text('Remove Tag from selected notes'),
                                             onTap: () async {
                                               Set<String> tags = {};
 
-                                              for (String title
-                                                  in _selectedNotes) {
-                                                Note note =
-                                                    store.getNote(title);
+                                              for (String title in _selectedNotes) {
+                                                Note note = store.getNote(title);
                                                 tags.addAll(note.tags);
                                               }
 
-                                              String tagToRemove =
-                                                  await showDialog(
-                                                      context: context,
-                                                      builder: (context) =>
-                                                          AlertDialog(
-                                                            title: Text(
-                                                                'Choose Tag to remove'),
-                                                            content:
-                                                                SingleChildScrollView(
-                                                              child: Column(
-                                                                children: <
-                                                                    Widget>[
-                                                                  for (String tag
-                                                                      in tags)
-                                                                    ListTile(
-                                                                        title: Text(
-                                                                            tag),
-                                                                        onTap:
-                                                                            () {
-                                                                          Navigator.of(context)
-                                                                              .pop(tag);
-                                                                        })
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            actions: <Widget>[
-                                                              TextButton(
-                                                                child: Text(
-                                                                    'Cancel'),
-                                                                onPressed: () {
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pop();
-                                                                },
-                                                              ),
+                                              String tagToRemove = await showDialog(
+                                                  context: context,
+                                                  builder: (context) => AlertDialog(
+                                                        title: Text('Choose Tag to remove'),
+                                                        content: SingleChildScrollView(
+                                                          child: Column(
+                                                            children: <Widget>[
+                                                              for (String tag in tags)
+                                                                ListTile(
+                                                                    title: Text(tag),
+                                                                    onTap: () {
+                                                                      Navigator.of(context).pop(tag);
+                                                                    })
                                                             ],
-                                                          ));
-                                              if ((tagToRemove ?? '').length >
-                                                  0) {
+                                                          ),
+                                                        ),
+                                                        actions: <Widget>[
+                                                          TextButton(
+                                                            child: Text('Cancel'),
+                                                            onPressed: () {
+                                                              Navigator.of(context).pop();
+                                                            },
+                                                          ),
+                                                        ],
+                                                      ));
+                                              if ((tagToRemove ?? '').length > 0) {
                                                 print('REMOVE');
-                                                await _modifyAll(
-                                                    (Note note) async {
+                                                await _modifyAll((Note note) async {
                                                   note.tags.remove(tagToRemove);
-                                                  PersistentStore.saveNote(
-                                                      note);
+                                                  PersistentStore.saveNote(note);
                                                 });
                                                 store.updateTagList();
                                               }
@@ -841,68 +780,52 @@ class _NoteListPageState extends State<NoteListPage> {
                                           ListTile(
                                             leading: Icon(MdiIcons.delete),
                                             title: Text('Move to trash'),
-                                            onTap: () =>
-                                                _modifyAll((Note note) {
+                                            onTap: () => _modifyAll((Note note) {
                                               note.deleted = true;
 
                                               PersistentStore.saveNote(note);
                                             }),
                                           ),
                                           ListTile(
-                                            leading:
-                                                Icon(MdiIcons.deleteRestore),
+                                            leading: Icon(MdiIcons.deleteRestore),
                                             title: Text('Restore from trash'),
-                                            onTap: () =>
-                                                _modifyAll((Note note) {
+                                            onTap: () => _modifyAll((Note note) {
                                               note.deleted = false;
 
                                               PersistentStore.saveNote(note);
                                             }),
                                           ),
                                           ListTile(
-                                              leading:
-                                                  Icon(MdiIcons.deleteForever),
+                                              leading: Icon(MdiIcons.deleteForever),
                                               title: Text('Delete forever'),
                                               onTap: () async {
                                                 if (await showDialog(
                                                         context: context,
-                                                        builder:
-                                                            (context) =>
-                                                                AlertDialog(
-                                                                  title: Text(
-                                                                      'Do you really want to delete the selected notes?'),
-                                                                  content: Text(
-                                                                      'This will delete them permanently.'),
-                                                                  actions: <
-                                                                      Widget>[
-                                                                    TextButton(
-                                                                      child: Text(
-                                                                          'Cancel'),
-                                                                      onPressed:
-                                                                          () {
-                                                                        Navigator.of(context)
-                                                                            .pop(false);
-                                                                      },
-                                                                    ),
-                                                                    TextButton(
-                                                                      child: Text(
-                                                                          'Delete'),
-                                                                      onPressed:
-                                                                          () {
-                                                                        Navigator.of(context)
-                                                                            .pop(true);
-                                                                      },
-                                                                    )
-                                                                  ],
-                                                                )) ??
+                                                        builder: (context) => AlertDialog(
+                                                              title: Text(
+                                                                  'Do you really want to delete the selected notes?'),
+                                                              content: Text('This will delete them permanently.'),
+                                                              actions: <Widget>[
+                                                                TextButton(
+                                                                  child: Text('Cancel'),
+                                                                  onPressed: () {
+                                                                    Navigator.of(context).pop(false);
+                                                                  },
+                                                                ),
+                                                                TextButton(
+                                                                  child: Text('Delete'),
+                                                                  onPressed: () {
+                                                                    Navigator.of(context).pop(true);
+                                                                  },
+                                                                )
+                                                              ],
+                                                            )) ??
                                                     false) {
                                                   await _modifyAll((Note note) {
                                                     store.allNotes.remove(note);
 
-                                                    PersistentStore.deleteNote(
-                                                        note);
-                                                    _selectedNotes
-                                                        .remove(note.title);
+                                                    PersistentStore.deleteNote(note);
+                                                    _selectedNotes.remove(note.title);
                                                   });
                                                 }
                                               })
@@ -936,17 +859,14 @@ class _NoteListPageState extends State<NoteListPage> {
                           IconButton(
                             icon: Icon(Icons.info),
                             onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => AboutPage(store)));
+                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => AboutPage(store)));
                             },
                           ),
                           IconButton(
                             icon: Icon(Icons.settings),
                             onPressed: () async {
-                              await Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          SettingsPage(store)));
+                              await Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (context) => SettingsPage(store)));
                               setState(() {});
                             },
                           ),
@@ -959,10 +879,7 @@ class _NoteListPageState extends State<NoteListPage> {
                   TagDropdown('', store, () {
                     Navigator.of(context).pop();
                     _filterAndSortNotes();
-                  },
-                      icon: MdiIcons.noteText,
-                      displayTag: 'All Notes',
-                      hasSubTags: false),
+                  }, icon: MdiIcons.noteText, displayTag: 'All Notes', hasSubTags: false),
                   TagDropdown('Favorites', store, () {
                     Navigator.of(context).pop();
                     _filterAndSortNotes();
@@ -1076,10 +993,7 @@ class TagDropdown extends StatefulWidget {
   final bool hasSubTags;
 
   TagDropdown(this.tag, this.store /* this.subTags */, this.apply,
-      {this.icon,
-      this.foldedByDefault = true,
-      this.displayTag,
-      this.hasSubTags});
+      {this.icon, this.foldedByDefault = true, this.displayTag, this.hasSubTags});
 
   @override
   _TagDropdownState createState() => _TagDropdownState();
@@ -1117,21 +1031,14 @@ class _TagDropdownState extends State<TagDropdown> {
           leading: widget.icon != null
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Icon(widget.icon,
-                      color:
-                          _isSelected ? Theme.of(context).accentColor : null),
+                  child: Icon(widget.icon, color: _isSelected ? Theme.of(context).accentColor : null),
                 )
               : _hasSubTags
                   ? InkWell(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Icon(
-                            _folded
-                                ? MdiIcons.chevronRight
-                                : MdiIcons.chevronDown,
-                            color: _isSelected
-                                ? Theme.of(context).accentColor
-                                : null),
+                        child: Icon(_folded ? MdiIcons.chevronRight : MdiIcons.chevronDown,
+                            color: _isSelected ? Theme.of(context).accentColor : null),
                       ),
                       onTap: () {
                         setState(() {
@@ -1144,14 +1051,9 @@ class _TagDropdownState extends State<TagDropdown> {
                     ),
           // trailing: Text(_countNotesWithTag(allNotes, tag).toString()),
           title: Text(widget.displayTag ?? widget.tag.split('/').last,
-              style: _isSelected
-                  ? TextStyle(color: Theme.of(context).accentColor)
-                  : null),
-          trailing: Text(
-              store.countNotesWithTag(store.allNotes, widget.tag).toString(),
-              style: _isSelected
-                  ? TextStyle(color: Theme.of(context).accentColor)
-                  : null),
+              style: _isSelected ? TextStyle(color: Theme.of(context).accentColor) : null),
+          trailing: Text(store.countNotesWithTag(store.allNotes, widget.tag).toString(),
+              style: _isSelected ? TextStyle(color: Theme.of(context).accentColor) : null),
 
           onTap: () {
             store.currentTag = widget.tag;

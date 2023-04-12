@@ -86,19 +86,6 @@ class Samples {
     '2nde-Chap-17-Fluctuation-d-Echantillonnage-et-Simulation-DS-2018-03-27-Sujet (2).md',
     '2nde-Chap-17-Fluctuation-d-Echantillonnage-et-Simulation-Exos.md',
     '2nde-Chap-18-Arithmetique-Cours.md',
-
-    // 'Welcome to Noteless 🙋.md',
-    // '01 - The Data Directory.md',
-    // '02 - The Sidebar.md',
-    // '03 - The Main Page.md',
-    // '04 - The Editor.md',
-    // '05 - Notes.md',
-    // '06 - Tags.md',
-    // '07 - Multi-Note Editing.md',
-    // '08 - Linking Attachments, Notes, Tags and Searches.md',
-    // '09 - Synchronization.md',
-    // '10 - Version Control.md',
-    // 'Wrapping up 🎉.md',
   ];
   static List tutorialAttachments = [
     '2nd-03-08-2022-001.jpg',
@@ -225,7 +212,5 @@ class Samples {
     '2nde-vec3-16-08-2022-055.jpg',
     '2nde-vec3-16-08-2022-056.jpg',
     '2nde-vec3-16-08-2022-057.jpg',
-
-    // 'icon.png', 'icon_small.png'
   ];
 }
