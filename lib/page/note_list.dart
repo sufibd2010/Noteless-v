@@ -21,9 +21,9 @@ import 'package:uuid/uuid.dart';
 import 'about.dart';
 
 class NoteListPage extends StatefulWidget {
-  final String filterTag;
-  final String searchText;
-  final bool isFirstPage;
+  final String? filterTag;
+  final String? searchText;
+  final bool? isFirstPage;
 
   NoteListPage({this.filterTag, this.searchText, @required this.isFirstPage});
 
@@ -37,21 +37,21 @@ class _NoteListPageState extends State<NoteListPage> {
   TextEditingController _searchFieldCtrl = TextEditingController();
   bool searching = false;
 
-  StreamSubscription _intentDataStreamSubscription;
+  StreamSubscription? _intentDataStreamSubscription;
 
   @override
   void initState() {
-    store.currTag = widget.filterTag ?? PrefService.getString('current_tag') ?? '';
+    store.currTag = widget.filterTag ?? PrefService.getString('current_tag');
 
     if (widget.searchText != null) {
-      _searchFieldCtrl.text = widget.searchText;
-      store.searchText = widget.searchText;
+      _searchFieldCtrl.text = widget.searchText!;
+      store.searchText = widget.searchText!;
       searching = true;
     }
 
     store.init();
     _load().then((_) {
-      if (widget.isFirstPage) {
+      if (widget.isFirstPage!) {
         final quickActions = QuickActions();
         quickActions.initialize((shortcutType) {
           if (shortcutType == 'action_create_note') {
@@ -84,12 +84,12 @@ class _NoteListPageState extends State<NoteListPage> {
 
   @override
   void dispose() {
-    _intentDataStreamSubscription.cancel();
+    _intentDataStreamSubscription!.cancel();
     super.dispose();
   }
 
   handleSharedText(String value) {
-    if (value == null) return;
+    if (value == '') return;
 
     showDialog(
         context: context,
@@ -120,7 +120,7 @@ class _NoteListPageState extends State<NoteListPage> {
       });
       return false;
     }
-    if (!widget.isFirstPage) return true;
+    if (!widget.isFirstPage!) return true;
     return await showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -143,7 +143,7 @@ class _NoteListPageState extends State<NoteListPage> {
         false;
   }
 
-  Directory notesDir, attachmentsDir;
+  Directory? notesDir, attachmentsDir;
 
   Future _filterAndSortNotes() async {
     store.filterAndSortNotes();
@@ -216,7 +216,7 @@ class _NoteListPageState extends State<NoteListPage> {
 
   @override
   Widget build(BuildContext context) {
-    Color searchFieldColor = Theme.of(context).primaryTextTheme.bodyText1.color;
+    Color searchFieldColor = Theme.of(context).primaryTextTheme.bodyText1!.color!;
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -277,7 +277,7 @@ class _NoteListPageState extends State<NoteListPage> {
               IconButton(
                 icon: Icon(Icons.close),
                 onPressed: () {
-                  store.searchText = null;
+                  store.searchText = '';
                   setState(() {
                     searching = false;
                   });
@@ -324,11 +324,13 @@ class _NoteListPageState extends State<NoteListPage> {
                             SizedBox(
                               width: 16,
                             ),
-                            DropdownButton(
-                              value: PrefService.getString('sort_key') ?? 'title',
+                            DropdownButton<dynamic>(
+                              value: PrefService.getString('sort_key') != null
+                                  ? PrefService.getString('sort_key')
+                                  : 'title',
                               underline: Container(),
                               onChanged: (key) {
-                                PrefService.setString('sort_key', key);
+                                PrefService.setString('sort_key', key.toString());
                                 _filterAndSortNotes();
                               },
                               items: <DropdownMenuItem>[
@@ -351,14 +353,14 @@ class _NoteListPageState extends State<NoteListPage> {
                             ),
                             InkWell(
                               child: Icon(
-                                (PrefService.getBool('sort_direction_asc') ?? true)
+                                (PrefService.getBool('sort_direction_asc'))
                                     ? Icons.keyboard_arrow_down
                                     : Icons.keyboard_arrow_up,
                                 size: 32,
                               ),
                               onTap: () {
                                 PrefService.setBool(
-                                    'sort_direction_asc', !(PrefService.getBool('sort_direction_asc') ?? true));
+                                    'sort_direction_asc', !(PrefService.getBool('sort_direction_asc')));
 
                                 _filterAndSortNotes();
                               },
@@ -376,11 +378,11 @@ class _NoteListPageState extends State<NoteListPage> {
                         height: 1,
                         color: Colors.grey.shade300,
                       ),
-                      for (Note note in store.shownNotes)
+                      for (Note note in store.shownNotes!)
                         note.file == null
                             ? ListTile(
                                 title: Text(
-                                  note.title,
+                                  note.title!,
                                   style: TextStyle(
                                     fontStyle: FontStyle.italic,
                                     fontWeight: FontWeight.bold,
@@ -388,100 +390,11 @@ class _NoteListPageState extends State<NoteListPage> {
                                 ),
                               )
                             : Slidable(
-                                actionPane: SlidableDrawerActionPane(),
-                                actions: <Widget>[
-                                  if (note.deleted) ...[
-                                    IconSlideAction(
-                                      caption: 'Delete',
-                                      color: Colors.red,
-                                      icon: Icons.delete_forever,
-                                      onTap: () async {
-                                        if (await showDialog(
-                                                context: context,
-                                                builder: (context) => AlertDialog(
-                                                      title: Text('Do you really want to delete this note?'),
-                                                      content: Text('This will delete it permanently.'),
-                                                      actions: <Widget>[
-                                                        TextButton(
-                                                          child: Text('Cancel'),
-                                                          onPressed: () {
-                                                            Navigator.of(context).pop(false);
-                                                          },
-                                                        ),
-                                                        TextButton(
-                                                          child: Text('Delete'),
-                                                          onPressed: () {
-                                                            Navigator.of(context).pop(true);
-                                                          },
-                                                        )
-                                                      ],
-                                                    )) ??
-                                            false) {
-                                          store.allNotes.remove(note);
-                                          PersistentStore.deleteNote(note);
-
-                                          await _filterAndSortNotes();
-                                        }
-                                      },
-                                    ),
-                                    IconSlideAction(
-                                      caption: 'Restore',
-                                      color: Colors.redAccent,
-                                      icon: MdiIcons.deleteRestore,
-                                      onTap: () async {
-                                        note.deleted = false;
-
-                                        PersistentStore.saveNote(note);
-
-                                        await _filterAndSortNotes();
-                                      },
-                                    ),
-                                  ],
-                                  if (!note.deleted)
-                                    IconSlideAction(
-                                      caption: 'Trash',
-                                      color: Colors.red,
-                                      icon: Icons.delete,
-                                      onTap: () async {
-                                        note.deleted = true;
-
-                                        PersistentStore.saveNote(note);
-
-                                        await _filterAndSortNotes();
-                                      },
-                                    ),
-                                ],
-                                secondaryActions: <Widget>[
-                                  IconSlideAction(
-                                    caption: note.favorited ? 'Unstar' : 'Star',
-                                    color: Colors.yellow,
-                                    icon: note.favorited ? MdiIcons.starOff : MdiIcons.star,
-                                    onTap: () async {
-                                      note.favorited = !note.favorited;
-
-                                      PersistentStore.saveNote(note);
-
-                                      await _filterAndSortNotes();
-                                    },
-                                  ),
-                                  IconSlideAction(
-                                    caption: note.pinned ? 'Unpin' : 'Pin',
-                                    color: Colors.green,
-                                    icon: note.pinned ? MdiIcons.pinOff : MdiIcons.pin,
-                                    onTap: () async {
-                                      note.pinned = !note.pinned;
-
-                                      PersistentStore.saveNote(note);
-
-                                      await _filterAndSortNotes();
-                                    },
-                                  ),
-                                ],
-                                child: ListTile(
+                               child: ListTile(
                                   selected: _selectedNotes.contains(note.title),
-                                  title: Text(note.title),
+                                  title: Text(note.title!),
                                   subtitle: store.isDendronModeEnabled
-                                      ? Text(note.file.path.substring(store.notesDir.path.length + 1))
+                                      ? Text(note.file!.path.substring(store.notesDir!.path.length + 1))
                                       : null,
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -517,7 +430,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                         if (_selectedNotes.contains(note.title)) {
                                           _selectedNotes.remove(note.title);
                                         } else {
-                                          _selectedNotes.add(note.title);
+                                          _selectedNotes.add(note.title!);
                                         }
                                       });
                                       return;
@@ -538,12 +451,108 @@ class _NoteListPageState extends State<NoteListPage> {
                                       if (_selectedNotes.contains(note.title)) {
                                         _selectedNotes.remove(note.title);
                                       } else {
-                                        _selectedNotes.add(note.title);
+                                        _selectedNotes.add(note.title!);
                                       }
                                     });
                                   },
                                 ),
-                              )
+                                startActionPane:ActionPane(
+                                  motion: const ScrollMotion(),
+                               children:  <Widget>[
+                                  if (note.deleted) ...[
+                                    SlidableAction(
+                                       label: 'Delete',
+                                      backgroundColor: Colors.red,
+                                      icon: Icons.delete_forever,
+                                      onPressed: (e) async {
+                                        if (await showDialog(
+                                                context: context,
+                                                builder: (context) => AlertDialog(
+                                                      title: Text('Do you really want to delete this note?'),
+                                                      content: Text('This will delete it permanently.'),
+                                                      actions: <Widget>[
+                                                        TextButton(
+                                                          child: Text('Cancel'),
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop(false);
+                                                          },
+                                                        ),
+                                                        TextButton(
+                                                          child: Text('Delete'),
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop(true);
+                                                          },
+                                                        )
+                                                      ],
+                                                    )) ??
+                                            false) {
+                                          store.allNotes!.remove(note);
+                                          PersistentStore.deleteNote(note);
+
+                                          await _filterAndSortNotes();
+                                        }
+                                      },
+                                    ),
+                                    SlidableAction(
+                                      label: 'Restore',
+                                      backgroundColor: Colors.redAccent,
+                                      icon: MdiIcons.deleteRestore,
+                                      onPressed: (e) async {
+                                        note.deleted = false;
+
+                                        PersistentStore.saveNote(note);
+
+                                        await _filterAndSortNotes();
+                                      },
+                                    ),
+                                  ],
+                                  if (!note.deleted)
+                                    SlidableAction(
+                                      label: 'Trash',
+                                      backgroundColor: Colors.red,
+                                      icon: Icons.delete,
+                                      onPressed: (e) async {
+                                        note.deleted = true;
+
+                                        PersistentStore.saveNote(note);
+
+                                        await _filterAndSortNotes();
+                                      },
+                                    ),
+                                ],
+                                ),
+                                endActionPane:
+                                ActionPane(
+                                  motion: const ScrollMotion(),
+                               children:  <Widget>[
+                                  SlidableAction(
+                                    label: note.favorited ? 'Unstar' : 'Star',
+                                    backgroundColor: Colors.yellow,
+                                    icon: note.favorited ? MdiIcons.starOff : MdiIcons.star,
+                                    onPressed: (e) async {
+                                      note.favorited = !note.favorited;
+
+                                      PersistentStore.saveNote(note);
+
+                                      await _filterAndSortNotes();
+                                    },
+                                  ),
+                                  SlidableAction(
+                                    label: note.pinned ? 'Unpin' : 'Pin',
+                                    backgroundColor: Colors.green,
+                                    icon: note.pinned ? MdiIcons.pinOff : MdiIcons.pin,
+                                    onPressed: (e) async {
+                                      note.pinned = !note.pinned;
+
+                                      PersistentStore.saveNote(note);
+
+                                      await _filterAndSortNotes();
+                                    },
+                                  ),
+                                ],
+                             
+                              ),
+                              ),  
                     ],
                   ),
                 ),
@@ -601,8 +610,8 @@ class _NoteListPageState extends State<NoteListPage> {
                                     child: Text('ALL'),
                                   ),
                                   onTap: () {
-                                    store.shownNotes.forEach((s) {
-                                      _selectedNotes.add(s.title);
+                                    store.shownNotes!.forEach((s) {
+                                      _selectedNotes.add(s.title!);
                                     });
                                     setState(() {});
                                   },
@@ -613,7 +622,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                     child: Text('NONE'),
                                   ),
                                   onTap: () {
-                                    store.shownNotes.forEach((s) {
+                                    store.shownNotes!.forEach((s) {
                                       _selectedNotes.remove(s.title);
                                     });
                                     setState(() {});
@@ -732,7 +741,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                                           ),
                                                         ],
                                                       ));
-                                              if ((newTag ?? '').length > 0) {
+                                              if ((newTag ).length > 0) {
                                                 print('ADD');
                                                 await _modifyAll((Note note) async {
                                                   note.tags.add(newTag);
@@ -781,7 +790,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                                           ),
                                                         ],
                                                       ));
-                                              if ((tagToRemove ?? '').length > 0) {
+                                              if ((tagToRemove).length > 0) {
                                                 print('REMOVE');
                                                 await _modifyAll((Note note) async {
                                                   note.tags.remove(tagToRemove);
@@ -858,7 +867,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                                             )) ??
                                                     false) {
                                                   await _modifyAll((Note note) {
-                                                    store.allNotes.remove(note);
+                                                    store.allNotes!.remove(note);
 
                                                     PersistentStore.deleteNote(note);
                                                     _selectedNotes.remove(note.title);
@@ -875,9 +884,7 @@ class _NoteListPageState extends State<NoteListPage> {
                   ),
                 ),
               ),
-        drawer: store.shownNotes == null
-            ? Container()
-            : Drawer(
+        drawer: store.shownNotes!.isNotEmpty ? Drawer(
                 child: ListView(
                 children: <Widget>[
                   ListTile(
@@ -885,7 +892,7 @@ class _NoteListPageState extends State<NoteListPage> {
                         future: PackageInfo.fromPlatform(),
                         builder: (context, snap) {
                           if (!snap.hasData) return SizedBox();
-                          PackageInfo info = snap.data;
+                          PackageInfo info = snap.data as PackageInfo;
                           return Text('${info.appName} ${info.version}');
                         },
                       ),
@@ -944,7 +951,7 @@ class _NoteListPageState extends State<NoteListPage> {
                     _filterAndSortNotes();
                   }, icon: Icons.delete),
                 ],
-              )),
+              )) : Container(),
       ),
     );
   }
@@ -958,7 +965,7 @@ class _NoteListPageState extends State<NoteListPage> {
 
       bool exists = false;
 
-      for (Note note in store.allNotes) {
+      for (Note note in store.allNotes!) {
         if (title == note.title) {
           exists = true;
           break;
@@ -985,8 +992,8 @@ class _NoteListPageState extends State<NoteListPage> {
     newNote.created = DateTime.now();
     newNote.modified = newNote.created;
 
-    newNote.file = File('${store.notesDir.path}/${newNote.title}.md');
-    store.allNotes.add(newNote);
+    newNote.file = File('${store.notesDir!.path}/${newNote.title}.md');
+    store.allNotes!.add(newNote);
 
     _filterAndSortNotes();
 
@@ -1020,13 +1027,13 @@ class TagDropdown extends StatefulWidget {
 
   final Function apply;
 
-  final IconData icon;
+  final IconData? icon;
 
   final bool foldedByDefault;
 
-  final String displayTag;
+  final String? displayTag;
 
-  final bool hasSubTags;
+  final bool? hasSubTags;
 
   TagDropdown(this.tag, this.store /* this.subTags */, this.apply,
       {this.icon, this.foldedByDefault = true, this.displayTag, this.hasSubTags});
@@ -1038,7 +1045,7 @@ class TagDropdown extends StatefulWidget {
 class _TagDropdownState extends State<TagDropdown> {
   NotesStore get store => widget.store;
 
-  bool _folded;
+  bool? _folded;
 
   @override
   void initState() {
@@ -1054,9 +1061,9 @@ class _TagDropdownState extends State<TagDropdown> {
     if (store.currentTag.startsWith(widget.tag)) _folded = false;
   }
 
-  bool _hasSubTags;
+  bool? _hasSubTags;
 
-  bool _isSelected;
+  bool? _isSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -1067,18 +1074,18 @@ class _TagDropdownState extends State<TagDropdown> {
           leading: widget.icon != null
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Icon(widget.icon, color: _isSelected ? Theme.of(context).accentColor : null),
+                  child: Icon(widget.icon, color: _isSelected! ? Theme.of(context).accentColor : null),
                 )
-              : _hasSubTags
+              : _hasSubTags!
                   ? InkWell(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Icon(_folded ? MdiIcons.chevronRight : MdiIcons.chevronDown,
-                            color: _isSelected ? Theme.of(context).accentColor : null),
+                        child: Icon(_folded! ? MdiIcons.chevronRight : MdiIcons.chevronDown,
+                            color: _isSelected! ? Theme.of(context).accentColor : null),
                       ),
                       onTap: () {
                         setState(() {
-                          _folded = !_folded;
+                          _folded = !_folded!;
                         });
                       },
                     )
@@ -1087,16 +1094,16 @@ class _TagDropdownState extends State<TagDropdown> {
                     ),
           // trailing: Text(_countNotesWithTag(allNotes, tag).toString()),
           title: Text(widget.displayTag ?? widget.tag.split('/').last,
-              style: _isSelected ? TextStyle(color: Theme.of(context).accentColor) : null),
-          trailing: Text(store.countNotesWithTag(store.allNotes, widget.tag).toString(),
-              style: _isSelected ? TextStyle(color: Theme.of(context).accentColor) : null),
+              style: _isSelected! ? TextStyle(color: Theme.of(context).accentColor) : null),
+          trailing: Text(store.countNotesWithTag(store.allNotes!, widget.tag).toString(),
+              style: _isSelected! ? TextStyle(color: Theme.of(context).accentColor) : null),
 
           onTap: () {
             store.currentTag = widget.tag;
             widget.apply();
           },
         ),
-        if (_hasSubTags && !_folded)
+        if (_hasSubTags! && !_folded!)
           Padding(
             padding: const EdgeInsets.only(left: 24),
             child: Column(

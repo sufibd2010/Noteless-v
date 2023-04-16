@@ -30,7 +30,8 @@ dependencies:
   html: ^0.15.2
   intl: ^0.18.0
   markd:
-    git: https://github.com/redsolver/markd.git
+    ^4.0.2
+    # git: https://github.com/redsolver/markd.git
   material_design_icons_flutter: ^6.0.7096
   package_info: ^2.0.2
   path_provider: ^2.0.14

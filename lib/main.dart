@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:app/external_package/preference/preference_service.dart';
 import 'package:device_info/device_info.dart';
@@ -39,7 +39,7 @@ main() async {
   );
 }
 
-AndroidDeviceInfo androidDeviceInfo;
+late AndroidDeviceInfo androidDeviceInfo;
 
 bool previewFeatureEnabled = true;
 

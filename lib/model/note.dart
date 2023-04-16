@@ -1,19 +1,19 @@
 import 'dart:io';
 
 class Note {
-  String title;
-  DateTime created;
-  DateTime modified;
+  String? title;
+  DateTime? created;
+  DateTime? modified;
   List<String> tags = [];
   List<String> attachments = [];
   bool pinned = false;
   bool favorited = false;
   bool deleted = false;
-  File file;
+  File? file;
 
   bool usesMillis = false;
   bool usesUpdatedInsteadOfModified = false;
-  Map<String, dynamic> additionalFrontMatterKeys;
+  Map<String, dynamic>? additionalFrontMatterKeys;
 
   bool hasTag(String cTag) {
     if (cTag != '') {

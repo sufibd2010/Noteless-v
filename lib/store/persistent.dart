@@ -20,21 +20,21 @@ const supportedFrontMatterKeys = [
 
 class PersistentStore {
   static bool get isDendronModeEnabled =>
-      (PrefService.getBool('dendron_mode') ?? false);
+      (PrefService.getBool('dendron_mode'));
 
   static Future<String> readContent(
     Note note,
   ) async {
-    if (!note.file.existsSync()) return null;
+    if (!note.file!.existsSync()) return '';
 
-    String fileContent = await note.file.readAsString();
+    String fileContent = await note.file!.readAsString();
 
     var content;
 
     if (fileContent.trimLeft().startsWith('---')) {
       var doc = fm.parse(fileContent);
       if (doc.content != null) {
-        content = doc.content.trimLeft();
+        content = doc.content!.trimLeft();
       } else {
         content = fileContent.trimLeft();
       }
@@ -51,7 +51,7 @@ class PersistentStore {
     return content;
   }
 
-  static Future saveNote(Note note, [String content]) async {
+  static Future saveNote(Note note, [String? content]) async {
     // print('PersistentStore.saveNote');
 
     if (content == null) {
@@ -67,7 +67,7 @@ class PersistentStore {
 
     data['title'] = note.title;
 
-    if (PrefService.getBool('notes_list_virtual_tags') ?? false) {
+    if (PrefService.getBool('notes_list_virtual_tags')) {
       note.tags.removeWhere((s) => s.startsWith('#/'));
     }
 
@@ -77,14 +77,14 @@ class PersistentStore {
 
     if (note.attachments.isNotEmpty) data['attachments'] = note.attachments;
 
-    if (note.usesMillis ?? false) {
-      data['created'] = note.created.millisecondsSinceEpoch;
+    if (note.usesMillis) {
+      data['created'] = note.created!.millisecondsSinceEpoch;
       data[note.usesUpdatedInsteadOfModified ? 'updated' : 'modified'] =
-          note.modified.millisecondsSinceEpoch;
+          note.modified!.millisecondsSinceEpoch;
     } else {
-      data['created'] = note.created.toIso8601String();
+      data['created'] = note.created!.toIso8601String();
       data[note.usesUpdatedInsteadOfModified ? 'updated' : 'modified'] =
-          note.modified.toIso8601String();
+          note.modified!.toIso8601String();
     }
 
     if (note.pinned) data['pinned'] = true;
@@ -92,7 +92,7 @@ class PersistentStore {
     if (note.deleted) data['deleted'] = true;
 
     if (note.additionalFrontMatterKeys != null) {
-      data.addAll(note.additionalFrontMatterKeys.cast<String, dynamic>());
+      data.addAll(note.additionalFrontMatterKeys!.cast<String, dynamic>());
     }
 
     header += toYamlString(data);
@@ -103,14 +103,14 @@ class PersistentStore {
 
     // print(header);
 
-    note.file.writeAsStringSync(header + content);
+    note.file!.writeAsStringSync(header + content);
     /*  print(header + content); */
   }
 
   static Future<Note> readNote(File file) async {
     // print('PersistentStore.readNote');
 
-    if (!file.existsSync()) return null;
+    if (!file.existsSync()) return Note();
 
     String fileContent = file.readAsStringSync();
 
@@ -121,7 +121,7 @@ class PersistentStore {
 /* 
         String headerString = fileContent.split('---')[1]; */
 
-      header = doc.data ?? {};
+      header = doc.data != null ? doc.data.cast<String, dynamic>() : {};
     } else {
       header = {};
     }
@@ -191,7 +191,7 @@ class PersistentStore {
     if (header.isNotEmpty) {
       note.additionalFrontMatterKeys = Map<String, dynamic>.from(header);
 
-      note.additionalFrontMatterKeys
+      note.additionalFrontMatterKeys!
           .removeWhere((key, value) => supportedFrontMatterKeys.contains(key));
     }
 
@@ -266,6 +266,6 @@ class PersistentStore {
   } */
 
   static Future deleteNote(Note note) async {
-    await note.file.delete();
+    await note.file!.delete();
   }
 }

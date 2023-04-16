@@ -3,18 +3,20 @@ import 'package:flutter/material.dart';
 
 class ThemeNotifier with ChangeNotifier {
   ThemeNotifier() {
-    _accentColor = Color(PrefService.getInt('theme_color') ?? 0xff21d885);
-    updateTheme(PrefService.getString('theme') ?? 'light');
+    Color _accentColor = Color(PrefService.getInt('theme_color') !=null ?PrefService.getInt('theme_color'): 0xff21d885);
+    updateTheme(PrefService.getString('theme')!=null ?PrefService.getString('theme'):'light');
+
+    
   }
 
   ThemeType currentTheme = ThemeType.light;
-  ThemeData _currentThemeData;
+  ThemeData _currentThemeData = ThemeData.light();
 
 /*  void switchTheme() => currentTheme == ThemeType.light
       ? currentTheme = ThemeType.dark
       : currentTheme = ThemeType.light; */
 
-  updateTheme([String theme]) {
+  updateTheme([String? theme]) {
     switch (theme) {
       case 'light':
         currentTheme = ThemeType.light;
@@ -55,9 +57,9 @@ class ThemeNotifier with ChangeNotifier {
 
   ThemeData get currentThemeData => _currentThemeData;
 
-  Color _accentColor;
+  Color _accentColor = Color(PrefService.getInt('theme_color') !=null ?PrefService.getInt('theme_color'): 0xff21d885);
 
-  get accentColor => _accentColor;
+  Color get accentColor => _accentColor;
   set accentColor(Color color) {
     if (color != null) {
       _accentColor = color;

@@ -35,8 +35,8 @@ class PreviewPage extends StatefulWidget {
 }
 
 class _PreviewPageState extends State<PreviewPage> {
-  WebViewController _controller;
-  String currentTextContent;
+  WebViewController? _controller;
+  String? currentTextContent;
 
   @override
   void initState() {
@@ -46,14 +46,14 @@ class _PreviewPageState extends State<PreviewPage> {
 
   List<int> checkboxPositions = [];
 
-  File previewFile;
+  File? previewFile;
 
   _processContent() async {
     //this.context = context;
 
     final directory = widget.store.applicationDocumentsDirectory;
 
-    final previewDir = Directory('${directory.path}/preview');
+    final previewDir = Directory('${directory!.path}/preview');
 
     const staticPreviewDir = 'file:///android_asset/flutter_assets/assets/preview';
 
@@ -61,13 +61,13 @@ class _PreviewPageState extends State<PreviewPage> {
                       Directory('${directory.path}/preview/assets'); */
 
     previewFile = File('${previewDir.path}/index.html');
-    previewFile.createSync(recursive: true);
+    previewFile!.createSync(recursive: true);
 
     // TODO iOS Preview
 
     currentTextContent = widget.textContent;
 
-    for (final match in RegExp(r'\[(x| )\]').allMatches(currentTextContent)) {
+    for (final match in RegExp(r'\[(x| )\]').allMatches(currentTextContent!)) {
       // print(match);
       checkboxPositions.add(match.start + 1);
     }
@@ -94,7 +94,7 @@ class _PreviewPageState extends State<PreviewPage> {
 
     String backgroundColor = theme.scaffoldBackgroundColor.value.toRadixString(16).padLeft(8, '0').substring(2);
 
-    String textColor = theme.textTheme.bodyText1.color.value.toRadixString(16).padLeft(8, '0').substring(2);
+    String textColor = theme.textTheme.bodyText1!.color!.value.toRadixString(16).padLeft(8, '0').substring(2);
 
     String accentColor = theme.accentColor.value.toRadixString(16).padLeft(8, '0').substring(2);
 
@@ -238,7 +238,7 @@ blockquote{
       return 'class="todo" type="checkbox" onclick="notelesscheckbox.postMessage( this.checked + \'-$checkboxIndex\');"';
     });
 
-    await previewFile.writeAsString(generatedPreview);
+    await previewFile!.writeAsString(generatedPreview);
 
     PlatformWebViewControllerCreationParams params;
 
@@ -274,12 +274,12 @@ Page resource error:
             print(request.url);
 
             if (request.url.startsWith('file://')) {
-              String link = Uri.decodeFull(RegExp(r'@.*').stringMatch(request.url));
+              String link = Uri.decodeFull(RegExp(r'@.*').stringMatch(request.url)!);
               print(link);
 
-              String type = RegExp(r'(?<=@).*(?=/)').stringMatch(link);
+              String type = RegExp(r'(?<=@).*(?=/)').stringMatch(link)!;
 
-              String data = RegExp(r'(?<=/).*').stringMatch(link);
+              String data = RegExp(r'(?<=/).*').stringMatch(link)!;
               print(type);
               print(data);
               print(Theme.of(context).brightness);
@@ -324,13 +324,13 @@ Page resource error:
         final index = checkboxPositions[id];
 
         currentTextContent =
-            currentTextContent.substring(0, index) + (checked ? 'x' : ' ') + currentTextContent.substring(index + 1);
+            currentTextContent!.substring(0, index) + (checked ? 'x' : ' ') + currentTextContent!.substring(index + 1);
 
-        widget.richCtrl.text = currentTextContent;
+        widget.richCtrl.text = currentTextContent!;
 
         // textContent
       })
-      ..loadFile('file://' + previewFile.path);
+      ..loadFile('file://' + previewFile!.path);
     // ..loadHtmlString(generatedPreview);
 
     // ..loadRequest(
@@ -367,7 +367,7 @@ Page resource error:
             : Stack(
                 children: <Widget>[
                   WebViewWidget(
-                    controller: _controller,
+                    controller: _controller!,
                   ),
                   // WebView(
                   //   initialUrl: 'file://' + previewFile.path,

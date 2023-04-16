@@ -84,7 +84,9 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(),
-                color: Color(PrefService.getInt('theme_color') ?? 0xff21d885),
+                color: Color(PrefService.getInt('theme_color') != null
+                    ? PrefService.getInt('theme_color')
+                    : 0xff21d885),
               ),
               child: SizedBox(
                 width: 28,
@@ -144,7 +146,7 @@ class _SettingsPageState extends State<SettingsPage> {
             onChange: () async {
               if (PrefService.getString('notable_external_directory') == null) {
                 PrefService.setString('notable_external_directory',
-                    (await getExternalStorageDirectory()).path);
+                    (await getExternalStorageDirectory())!.path);
               }
 
               await store.listNotes();
@@ -158,7 +160,9 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               title: Text('Location'),
               subtitle: Text(
-                PrefService.getString('notable_external_directory') ?? '',
+                PrefService.getString('notable_external_directory') != null
+                    ? PrefService.getString('notable_external_directory')
+                    : 'Not set',
               ),
               onTap: () async {
                 Directory dir;
@@ -344,25 +348,27 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<String> _pickExternalDir() async {
     if (!await Permission.storage.request().isGranted) {
-      return null;
+      return '';
     }
 
     var dir = await FilePicker.platform.getDirectoryPath();
     if ((dir ?? '').isNotEmpty) {
-      if (await _checkIfDirectoryIsWritable(dir)) {
+      if (await _checkIfDirectoryIsWritable(dir!)) {
         return dir;
       }
     }
 
     if ((await Permission.storage.request()).isDenied) {
-      return null;
+      return '';
     }
 
     var externalDir = await getExternalStorageDirectory();
-    if (await _checkIfDirectoryIsWritable(externalDir.path)) {
+    if (await _checkIfDirectoryIsWritable(externalDir!.path)) {
       return externalDir.path;
     }
-    return null;
+
+    return '';
+   
   }
 
   Future<bool> _checkIfDirectoryIsWritable(String path) async {
@@ -377,4 +383,6 @@ class _SettingsPageState extends State<SettingsPage> {
     }
     return true;
   }
+  
+  
 }

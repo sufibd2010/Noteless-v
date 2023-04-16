@@ -163,17 +163,17 @@ class _EditPageState extends State<EditPage> {
       String markedTitle = markd.markdownToHtml(
           RegExp(
             r'(?<=# ).*',
-          ).stringMatch(currentData),
+          ).stringMatch(currentData)!,
           extensionSet: markd.ExtensionSet.gitHubWeb);
       // print(markedTitle);
 
       title = markedTitle.replaceAll(RegExp(r'<[^>]*>'), '').trim();
     } catch (e) {
-      title = note!.title;
+      title = note!.title!;
     }
     // print(title);
 
-    File oldFile = note!.file;
+    File oldFile = note!.file!;
     if (note!.title != title && !store.isDendronModeEnabled) {
       if (File(PrefService.getString('notable_notes_directory') + '/' + title + '.md').existsSync()) {
         showDialog(
@@ -192,7 +192,7 @@ class _EditPageState extends State<EditPage> {
                 ));
         return;
       } else {
-        oldFile = note!.file;
+        oldFile = note!.file!;
         note!.file = File(PrefService.getString('notable_notes_directory') + '/' + title + '.md');
       }
     }
@@ -220,16 +220,16 @@ class _EditPageState extends State<EditPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(note!.title),
+                      Text(note!.title!),
                       Text(
-                        note!.file.path.substring(store.notesDir.path.length + 1),
+                        note!.file!.path.substring(store.notesDir.path.length + 1),
                         style: TextStyle(
                           fontSize: 12,
                         ),
                       )
                     ],
                   )
-                : Text(note!.title),
+                : Text(note!.title!),
             actions: <Widget>[
               if (!_saved)
                 IconButton(

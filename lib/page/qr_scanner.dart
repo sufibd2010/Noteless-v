@@ -13,7 +13,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class QrScanner extends StatefulWidget {
-  const QrScanner({Key key}) : super(key: key);
+  const QrScanner({Key? key}) : super(key: key);
 
   @override
   State<QrScanner> createState() => _QrScannerState();
@@ -21,20 +21,22 @@ class QrScanner extends StatefulWidget {
 
 class _QrScannerState extends State<QrScanner> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  QRViewController controller;
-  Barcode result;
-  bool get isDendronModeEnabled => PrefService.getBool('dendron_mode') ?? false;
+  QRViewController? controller;
+  Barcode? result;
+  bool get isDendronModeEnabled => PrefService.getBool('dendron_mode') != null
+      ? PrefService.getBool('dendron_mode')
+      : false;
   String get subDirectoryNotes => isDendronModeEnabled ? '' : '/notes';
 
-  Directory applicationDocumentsDirectory;
+  Directory? applicationDocumentsDirectory;
 
   @override
   void reassemble() {
     super.reassemble();
     if (Platform.isAndroid) {
-      controller.pauseCamera();
+      controller!.pauseCamera();
     } else if (Platform.isIOS) {
-      controller.resumeCamera();
+      controller!.resumeCamera();
     }
   }
 
@@ -69,7 +71,7 @@ class _QrScannerState extends State<QrScanner> {
   downloadFile() async {
     if (await checkPermission()) {
       Fluttertoast.showToast(
-          msg: "${result.code}",
+          msg: "${result!.code}",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,
@@ -81,7 +83,7 @@ class _QrScannerState extends State<QrScanner> {
       try {
         String _dateFormat = DateFormat("dd-MM-yyyy-HH:mm").format(DateTime.now());
         final taskId = await FlutterDownloader.enqueue(
-          url: result.code,
+          url: result!.code!,
           savedDir: _path,
           fileName: "Skolarbook_$_dateFormat",
           showNotification: true, // show download progress in status bar (for Android)
@@ -103,10 +105,10 @@ class _QrScannerState extends State<QrScanner> {
 
     Directory directory, notesDir;
     try {
-      if (PrefService.getBool('notable_external_directory_enabled') ?? false) {
+      if (PrefService.getBool('notable_external_directory_enabled')) {
         directory = Directory(PrefService.getString('notable_external_directory'));
       } else {
-        directory = applicationDocumentsDirectory;
+        directory = applicationDocumentsDirectory!;
       }
 
       // if (Platform.isIOS) {
@@ -124,13 +126,13 @@ class _QrScannerState extends State<QrScanner> {
       return notesDir.path;
     } catch (err) {
       print("Cannot get download folder path");
-      return null;
+      return "";
     }
   }
 
   static void downloadCallback(String id, DownloadTaskStatus status, int progress) {
     debugPrint('Background Isolate Callback: task ($id) is in status ($status) and process ($progress)');
-    final SendPort send = IsolateNameServer.lookupPortByName('downloader_send_port');
+    final SendPort send = IsolateNameServer.lookupPortByName('downloader_send_port')!;
     send.send([id, status, progress]);
   }
 
@@ -230,11 +232,11 @@ class _QrScannerState extends State<QrScanner> {
   }
 
   Positioned _buildArrow({
-    @required double angle,
-    double top,
-    double left,
-    double right,
-    double bottom,
+    required double angle,
+    double? top,
+    double? left,
+    double? right,
+    double? bottom,
   }) {
     return Positioned(
         top: top,
@@ -251,7 +253,7 @@ class _QrScannerState extends State<QrScanner> {
 
   @override
   void dispose() {
-    controller.dispose();
+    controller!.dispose();
     _unbindBackgroundIsolate();
     super.dispose();
   }

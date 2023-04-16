@@ -25,7 +25,7 @@ class _AboutPageState extends State<AboutPage> {
               future: PackageInfo.fromPlatform(),
               builder: (context, snap) {
                 if (!snap.hasData) return Container();
-                PackageInfo info = snap.data;
+                PackageInfo info = snap.data as PackageInfo;
                 return Column(
                   children: <Widget>[
                     Text('${info.appName}'),
