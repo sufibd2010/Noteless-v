@@ -8,12 +8,12 @@ import 'package:app/external_package/preference/preference_service.dart';
 import 'package:app/external_package/rich_editor/rich_code_controller.dart';
 import 'package:app/external_package/rich_editor/rich_code_field.dart';
 import 'package:app/main.dart';
+import 'package:app/model/note.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:app/model/note.dart';
 import 'package:markd/markdown.dart' as markd;
-import 'package:front_matter/front_matter.dart' as fm;
+
 import 'package:bsdiff/bsdiff.dart';
 import 'package:app/page/preview.dart';
 import 'package:app/store/notes.dart';
@@ -32,7 +32,7 @@ class EditPage extends StatefulWidget {
 
 class _EditPageState extends State<EditPage> {
   NotesStore get store => widget.store;
-  RichCodeEditingController _rec;
+  RichCodeEditingController?_rec;
   NotelessSyntaxHighlighter _syntaxHighlighterBase = NotelessSyntaxHighlighter();
 
   GlobalKey _richTextFieldState = GlobalKey();
@@ -43,13 +43,13 @@ class _EditPageState extends State<EditPage> {
     super.dispose();
   }
 
-  Note note;
+  Note? note;
 
   bool _saved = true;
 
   bool _previewEnabled = false;
 
-  TextSelection _textSelectionCache;
+  TextSelection? _textSelectionCache;
 
   @override
   void initState() {
@@ -61,20 +61,20 @@ class _EditPageState extends State<EditPage> {
   }
 
   _loadContent() async {
-    /*  String content = note.file.readAsStringSync();
+    /*  String content = note!.file.readAsStringSync();
 
     var doc = fm.parse(content); */
-    final content = await PersistentStore.readContent(note);
+    final content = await PersistentStore.readContent(note!);
 
     _rec = RichCodeEditingController(_syntaxHighlighterBase, text: content.trimLeft());
 
-    _rec.addListener(() {
-      if (_rec.text == currentData) return;
+    _rec!.addListener(() {
+      if (_rec!.text == currentData) return;
 
-      var diff = bsdiff(utf8.encode(_rec.text), utf8.encode(currentData));
+      var diff = bsdiff(utf8.encode(_rec!.text), utf8.encode(currentData));
 
       history.add(diff);
-      cursorHistory.add(_rec.selection.start);
+      cursorHistory.add(_rec!.selection.start);
 
       if (history.length == 1) {
         // First entry
@@ -85,9 +85,9 @@ class _EditPageState extends State<EditPage> {
         cursorHistory.removeAt(0);
       }
 
-      currentData = _rec.text;
+      currentData = _rec!.text;
 
-      if (PrefService.getBool('editor_auto_save') ?? false) {
+      if (PrefService.getBool('editor_auto_save')) {
         autosave();
       } else {
         if (_saved)
@@ -98,14 +98,14 @@ class _EditPageState extends State<EditPage> {
     });
 
     if (widget.autofocus) {
-      _rec.selection = TextSelection(baseOffset: 2, extentOffset: _rec.text.trim().length);
+      _rec!.selection = TextSelection(baseOffset: 2, extentOffset: _rec!.text.trim().length);
     }
 
-    currentData = _rec.text;
+    currentData = _rec!.text;
 
     //_updateMaxLines();
-    if (PrefService.getBool('editor_mode_switcher') ?? true) {
-      if (PrefService.getBool('editor_mode_switcher_is_preview') ?? false) {
+    if (PrefService.getBool('editor_mode_switcher') ) {
+      if (PrefService.getBool('editor_mode_switcher_is_preview') ) {
         setState(() {
           _previewEnabled = true;
         });
@@ -169,12 +169,12 @@ class _EditPageState extends State<EditPage> {
 
       title = markedTitle.replaceAll(RegExp(r'<[^>]*>'), '').trim();
     } catch (e) {
-      title = note.title;
+      title = note!.title;
     }
     // print(title);
 
-    File oldFile;
-    if (note.title != title && !store.isDendronModeEnabled) {
+    File oldFile = note!.file;
+    if (note!.title != title && !store.isDendronModeEnabled) {
       if (File(PrefService.getString('notable_notes_directory') + '/' + title + '.md').existsSync()) {
         showDialog(
             context: context,
@@ -192,18 +192,18 @@ class _EditPageState extends State<EditPage> {
                 ));
         return;
       } else {
-        oldFile = note.file;
-        note.file = File(PrefService.getString('notable_notes_directory') + '/' + title + '.md');
+        oldFile = note!.file;
+        note!.file = File(PrefService.getString('notable_notes_directory') + '/' + title + '.md');
       }
     }
 
-    note.title = title;
+    note!.title = title;
 
-    note.modified = DateTime.now();
+    note!.modified = DateTime.now();
 
-    await PersistentStore.saveNote(note, currentData);
+    await PersistentStore.saveNote(note!, currentData);
 
-    if (oldFile != null) oldFile.deleteSync();
+ oldFile.deleteSync();
   }
 
   @override
@@ -220,16 +220,16 @@ class _EditPageState extends State<EditPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(note.title),
+                      Text(note!.title),
                       Text(
-                        note.file.path.substring(store.notesDir.path.length + 1),
+                        note!.file.path.substring(store.notesDir.path.length + 1),
                         style: TextStyle(
                           fontSize: 12,
                         ),
                       )
                     ],
                   )
-                : Text(note.title),
+                : Text(note!.title),
             actions: <Widget>[
               if (!_saved)
                 IconButton(
@@ -243,7 +243,7 @@ class _EditPageState extends State<EditPage> {
                   },
                 ),
               if (previewFeatureEnabled)
-                ((PrefService.getBool('editor_mode_switcher') ?? true)
+                ((PrefService.getBool('editor_mode_switcher'))
                     ? Switch(
                         value: _previewEnabled,
                         activeColor: Theme.of(context).primaryIconTheme.color,
@@ -263,7 +263,7 @@ class _EditPageState extends State<EditPage> {
                                 appBar: AppBar(
                                   title: Text('Preview'),
                                 ),
-                                body: PreviewPage(store, _rec.text, _rec, Theme.of(context)),
+                                body: PreviewPage(store, _rec!.text, _rec!, Theme.of(context)),
                               ),
                             ),
                           );
@@ -271,69 +271,67 @@ class _EditPageState extends State<EditPage> {
                       )),
               PopupMenuButton<String>(
                 onCanceled: () {
-                  _rec.selection = _textSelectionCache;
+                  _rec!.selection = _textSelectionCache!;
                 },
                 onSelected: (String result) async {
-                  _rec.selection = _textSelectionCache;
+                  _rec!.selection = _textSelectionCache!;
 
                   int divIndex = result.indexOf('.');
                   if (divIndex == -1) divIndex = result.length;
 
                   switch (result.substring(0, divIndex)) {
                     case 'favorite':
-                      note.favorited = !note.favorited;
+                      note!.favorited = !note!.favorited;
 
                       break;
                     case 'pin':
-                      note.pinned = !note.pinned;
+                      note!.pinned = !note!.pinned;
 
                       break;
 
                     case 'addAttachment':
                       final result = await FilePicker.platform.pickFiles();
 
-                      File file = File(result.files.first.path);
+                      File file = File(result!.files.first.path!);
 
-                      if (file != null) {
-                        String fullFileName = file.path.split('/').last;
-                        int dotIndex = fullFileName.indexOf('.');
+                      String fullFileName = file.path.split('/').last;
+                      int dotIndex = fullFileName.indexOf('.');
 
-                        String fileName = fullFileName.substring(0, dotIndex);
-                        String fileEnding = fullFileName.substring(dotIndex);
+                      String fileName = fullFileName.substring(0, dotIndex);
+                      String fileEnding = fullFileName.substring(dotIndex);
 
-                        File newFile = File(store.attachmentsDir.path + '/' + fullFileName);
+                      File newFile = File(store.attachmentsDir.path + '/' + fullFileName);
 
-                        int i = 0;
+                      int i = 0;
 
-                        while (newFile.existsSync()) {
-                          i++;
-                          newFile = File(store.attachmentsDir.path + '/' + fileName + ' ($i)' + fileEnding);
-                        }
-                        await file.copy(newFile.path);
+                      while (newFile.existsSync()) {
+                        i++;
+                        newFile = File(store.attachmentsDir.path + '/' + fileName + ' ($i)' + fileEnding);
+                      }
+                      await file.copy(newFile.path);
 
-                        final attachmentName = newFile.path.split('/').last;
+                      final attachmentName = newFile.path.split('/').last;
 
-                        note.attachments.add(attachmentName);
+                      note!.attachments.add(attachmentName);
 
-                        await file.delete();
+                      await file.delete();
 
-                        int start = _rec.selection.start;
+                      int start = _rec!.selection.start;
 
-                        final insert = '![](@attachment/$attachmentName)';
-                        try {
-                          _rec.text = _rec.text.substring(
-                                0,
-                                start,
-                              ) +
-                              insert +
-                              _rec.text.substring(
-                                start,
-                              );
+                      final insert = '![](@attachment/$attachmentName)';
+                      try {
+                        _rec!.text = _rec!.text.substring(
+                              0,
+                              start,
+                            ) +
+                            insert +
+                            _rec!.text.substring(
+                              start,
+                            );
 
-                          _rec.selection = TextSelection(baseOffset: start, extentOffset: start + insert.length);
-                        } catch (e) {
-                          // TODO Handle this case
-                        }
+                        _rec!.selection = TextSelection(baseOffset: start, extentOffset: start + insert.length);
+                      } catch (e) {
+                        // TODO Handle this case
                       }
 
                       break;
@@ -362,16 +360,16 @@ class _EditPageState extends State<EditPage> {
                                   ),
                                 ],
                               ));
-                      if (remove ?? false) {
+                      if (remove) {
                         File file = File(store.attachmentsDir.path + '/' + attachment);
                         await file.delete();
-                        note.attachments.remove(attachment);
+                        note!.attachments.remove(attachment);
                       }
 
                       break;
 
                     case 'trash':
-                      note.deleted = !note.deleted;
+                      note!.deleted = !note!.deleted;
 
                       break;
 
@@ -403,9 +401,9 @@ class _EditPageState extends State<EditPage> {
                                   ),
                                 ],
                               ));
-                      if ((newTag ?? '').length > 0) {
+                      if ((newTag).length > 0) {
                         print('ADD');
-                        note.tags.add(newTag);
+                        note!.tags.add(newTag);
                         store.updateTagList();
                       }
                       break;
@@ -433,31 +431,31 @@ class _EditPageState extends State<EditPage> {
                                   ),
                                 ],
                               ));
-                      if (remove ?? false) {
+                      if (remove ) {
                         print('REMOVE');
-                        note.tags.remove(tag);
+                        note!.tags.remove(tag);
                         store.updateTagList();
                       }
 
                       break;
                   }
-                  PersistentStore.saveNote(note);
+                  PersistentStore.saveNote(note!);
                 },
                 itemBuilder: (BuildContext context) {
-                  _textSelectionCache = _rec.selection;
+                  _textSelectionCache = _rec!.selection;
                   return <PopupMenuEntry<String>>[
                     PopupMenuItem<String>(
                       value: 'favorite',
                       child: Row(
                         children: <Widget>[
                           Icon(
-                            note.favorited ? MdiIcons.starOff : MdiIcons.star,
+                            note!.favorited ? MdiIcons.starOff : MdiIcons.star,
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                           SizedBox(
                             width: 8,
                           ),
-                          Text(note.favorited ? 'Unfavorite' : 'Favorite'),
+                          Text(note!.favorited ? 'Unfavorite' : 'Favorite'),
                         ],
                       ),
                     ),
@@ -466,13 +464,13 @@ class _EditPageState extends State<EditPage> {
                       child: Row(
                         children: <Widget>[
                           Icon(
-                            note.pinned ? MdiIcons.pinOff : MdiIcons.pin,
+                            note!.pinned ? MdiIcons.pinOff : MdiIcons.pin,
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                           SizedBox(
                             width: 8,
                           ),
-                          Text(note.pinned ? 'Unpin' : 'Pin'),
+                          Text(note!.pinned ? 'Unpin' : 'Pin'),
                         ],
                       ),
                     ),
@@ -481,17 +479,17 @@ class _EditPageState extends State<EditPage> {
                       child: Row(
                         children: <Widget>[
                           Icon(
-                            note.deleted ? MdiIcons.deleteRestore : MdiIcons.delete,
+                            note!.deleted ? MdiIcons.deleteRestore : MdiIcons.delete,
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                           SizedBox(
                             width: 8,
                           ),
-                          Text(note.deleted ? 'Restore from trash' : 'Move to trash'),
+                          Text(note!.deleted ? 'Restore from trash' : 'Move to trash'),
                         ],
                       ),
                     ),
-                    for (String attachment in note.attachments)
+                    for (String attachment in note!.attachments)
                       PopupMenuItem<String>(
                         value: 'removeAttachment.$attachment',
                         child: Row(
@@ -525,7 +523,7 @@ class _EditPageState extends State<EditPage> {
                       ),
                     ),
                     //if (!store.isDendronModeEnabled) ...[
-                    for (String tag in note.tags)
+                    for (String tag in note!.tags)
                       PopupMenuItem<String>(
                         value: 'removeTag.$tag',
                         child: Row(
@@ -568,7 +566,7 @@ class _EditPageState extends State<EditPage> {
               //     ? LinearProgressIndicator()
               //     :
               _previewEnabled
-                  ? PreviewPage(store, _rec.text, _rec, Theme.of(context))
+                  ? PreviewPage(store, _rec!.text, _rec!, Theme.of(context))
                   : Column(
                       children: <Widget>[
                         Expanded(
@@ -582,31 +580,30 @@ class _EditPageState extends State<EditPage> {
                                   key: _richTextFieldState,
                                   scrollPhysics: NeverScrollableScrollPhysics(),
                                   autofocus: widget.autofocus,
-                                  controller: _rec,
+                                  controller: _rec!,
                                   style: TextStyle(
                                       fontFamily: 'FiraMono',
                                       fontFamilyFallback: ['monospace'],
                                       color: Theme.of(context).colorScheme.onSurface),
                                   inputFormatters: [
-                                    CharacterPair(PrefService.getBool('editor_pair_brackets') ?? false)
+                                    CharacterPair(PrefService.getBool('editor_pair_brackets'))
                                   ],
                                   textCapitalization: TextCapitalization.sentences,
-                                  decoration: null,
+                                 
                                   syntaxHighlighter: _syntaxHighlighterBase,
-                                  maxLines: null,
+                                
                                   cursorColor: Theme.of(context).accentColor,
                                   /* onChanged: (str) {
                                       }, */
                                   /* onBackSpacePress:
                                           (TextEditingValue oldValue) {}, */
-                                  onEnterPress: (PrefService.getBool('auto_bullet_points') ?? false)
-                                      ? (TextEditingValue oldValue) {
+                                  onEnterPress: (TextEditingValue oldValue) {
+                                    if (PrefService.getBool('auto_bullet_points')) {
                                           var result = _syntaxHighlighterBase.onEnterPress(oldValue);
-                                          if (result != null) {
-                                            _rec.value = result;
-                                          }
+                                          _rec!.value = result;
                                         }
-                                      : null,
+                                  },
+                                  
                                 ),
                               ),
                             ),
@@ -636,18 +633,18 @@ class _EditPageState extends State<EditPage> {
                                               currentData =
                                                   utf8.decode(bspatch(utf8.encode(currentData), history.removeLast()));
 
-                                              _rec.text = currentData;
+                                              _rec!.text = currentData;
 
                                               int pos = cursorHistory.removeLast();
                                               if (pos > 0) pos--;
 
-                                              _rec.selection = TextSelection(baseOffset: pos, extentOffset: pos);
+                                              _rec!.selection = TextSelection(baseOffset: pos, extentOffset: pos);
 
                                               if (history.isEmpty) {
                                                 setState(() {});
                                               }
 
-                                              if (PrefService.getBool('editor_auto_save') ?? false) {
+                                              if (PrefService.getBool('editor_auto_save')) {
                                                 autosave();
                                               } else {
                                                 if (_saved)
@@ -675,17 +672,17 @@ class _EditPageState extends State<EditPage> {
                                         size: 22,
                                       ),
                                       onTap: () {
-                                        int oldStart = _rec.selection.start;
+                                        int oldStart = _rec!.selection.start;
 
                                         int start = oldStart;
 
                                         while (start > 0) {
                                           start--;
-                                          if (_rec.text[start] == '\n') break;
+                                          if (_rec!.text[start] == '\n') break;
                                         }
                                         if (start != 0) start++;
 
-                                        String startOfLine = _rec.text.substring(
+                                        String startOfLine = _rec!.text.substring(
                                           start,
                                         );
                                         String part = '';
@@ -695,11 +692,11 @@ class _EditPageState extends State<EditPage> {
                                           part += s;
                                         }
 
-                                        final before = _rec.text.substring(0, start);
+                                        final before = _rec!.text.substring(0, start);
 
                                         if (part == '######') {
-                                          _rec.text = before + startOfLine.substring(6).trimLeft();
-                                          _rec.selection =
+                                          _rec!.text = before + startOfLine.substring(6).trimLeft();
+                                          _rec!.selection =
                                               TextSelection(baseOffset: oldStart - 7, extentOffset: oldStart - 7);
                                         } else {
                                           String change = '';
@@ -708,8 +705,8 @@ class _EditPageState extends State<EditPage> {
                                           } else {
                                             change = '#';
                                           }
-                                          _rec.text = before + change + startOfLine;
-                                          _rec.selection = TextSelection(
+                                          _rec!.text = before + change + startOfLine;
+                                          _rec!.selection = TextSelection(
                                               baseOffset: oldStart + change.length,
                                               extentOffset: oldStart + change.length);
                                         }
@@ -727,20 +724,20 @@ class _EditPageState extends State<EditPage> {
                                       ),
                                       onTap: () {
                                         // TODO Support * and >
-                                        int oldStart = _rec.selection.start;
+                                        int oldStart = _rec!.selection.start;
 
                                         int start = oldStart;
 
                                         while (start > 0) {
                                           start--;
-                                          if (_rec.text[start] == '\n') break;
+                                          if (_rec!.text[start] == '\n') break;
                                         }
                                         if (start != 0) start++;
 
-                                        String startOfLine = _rec.text.substring(
+                                        String startOfLine = _rec!.text.substring(
                                           start,
                                         );
-                                        final before = _rec.text.substring(0, start);
+                                        final before = _rec!.text.substring(0, start);
 
                                         if (startOfLine.trimLeft().startsWith('- ')) {
                                           int lengthDiff = startOfLine.length;
@@ -748,18 +745,18 @@ class _EditPageState extends State<EditPage> {
                                           lengthDiff = lengthDiff - (startOfLine.trimLeft().length);
 
                                           if (lengthDiff >= 8) {
-                                            _rec.text = before + startOfLine.trimLeft().substring(2);
-                                            _rec.selection = TextSelection(
+                                            _rec!.text = before + startOfLine.trimLeft().substring(2);
+                                            _rec!.selection = TextSelection(
                                                 baseOffset: oldStart - 2 - lengthDiff,
                                                 extentOffset: oldStart - 2 - lengthDiff);
                                           } else {
-                                            _rec.text = before + '  ' + startOfLine;
-                                            _rec.selection =
+                                            _rec!.text = before + '  ' + startOfLine;
+                                            _rec!.selection =
                                                 TextSelection(baseOffset: oldStart + 2, extentOffset: oldStart + 2);
                                           }
                                         } else {
-                                          _rec.text = before + '- ' + startOfLine;
-                                          _rec.selection =
+                                          _rec!.text = before + '- ' + startOfLine;
+                                          _rec!.selection =
                                               TextSelection(baseOffset: oldStart + 2, extentOffset: oldStart + 2);
                                         }
                                       },
@@ -775,23 +772,23 @@ class _EditPageState extends State<EditPage> {
                                             MdiIcons.checkBoxOutline,
                                           ),
                                           onTap: () {
-                                            int oldStart = _rec.selection.start;
+                                            int oldStart = _rec!.selection.start;
 
                                             int start = oldStart;
 
                                             while (start > 0) {
                                               start--;
-                                              if (_rec.text[start] == '\n')
+                                              if (_rec!.text[start] == '\n')
                                                 break;
                                             }
                                             if (start != 0) start++;
 
                                             String startOfLine =
-                                            _rec.text.substring(
+                                            _rec!.text.substring(
                                               start,
                                             );
                                             final before =
-                                            _rec.text.substring(0, start);
+                                            _rec!.text.substring(0, start);
 
                                             if (startOfLine
                                                 .trimLeft()
@@ -807,11 +804,11 @@ class _EditPageState extends State<EditPage> {
                                                       .length);
 
                                               if (lengthDiff >= 8) {
-                                                _rec.text = before +
+                                                _rec!.text = before +
                                                     startOfLine
                                                         .trimLeft()
                                                         .substring(6);
-                                                _rec.selection = TextSelection(
+                                                _rec!.selection = TextSelection(
                                                     baseOffset: oldStart -
                                                         2 -
                                                         lengthDiff,
@@ -819,16 +816,16 @@ class _EditPageState extends State<EditPage> {
                                                         2 -
                                                         lengthDiff);
                                               } else {
-                                                _rec.text =
+                                                _rec!.text =
                                                     before + '  ' + startOfLine;
-                                                _rec.selection = TextSelection(
+                                                _rec!.selection = TextSelection(
                                                     baseOffset: oldStart + 2,
                                                     extentOffset: oldStart + 2);
                                               }
                                             } else {
-                                              _rec.text =
+                                              _rec!.text =
                                                   before + '- [ ] ' + startOfLine;
-                                              _rec.selection = TextSelection(
+                                              _rec!.selection = TextSelection(
                                                   baseOffset: oldStart + 6,
                                                   extentOffset: oldStart + 6);
                                             }
@@ -849,20 +846,20 @@ class _EditPageState extends State<EditPage> {
                                         Icons.format_bold,
                                       ),
                                       onTap: () {
-                                        int start = _rec.selection.start;
-                                        int end = _rec.selection.end;
+                                        int start = _rec!.selection.start;
+                                        int end = _rec!.selection.end;
 
-                                        final before = _rec.text.substring(0, _rec.selection.start);
-                                        final content = _rec.text.substring(_rec.selection.start, _rec.selection.end);
-                                        final after = _rec.text.substring(_rec.selection.end);
+                                        final before = _rec!.text.substring(0, _rec!.selection.start);
+                                        final content = _rec!.text.substring(_rec!.selection.start, _rec!.selection.end);
+                                        final after = _rec!.text.substring(_rec!.selection.end);
 
                                         if (before.endsWith('**') && after.startsWith('**')) {
-                                          _rec.text =
+                                          _rec!.text =
                                               before.substring(0, before.length - 2) + content + after.substring(2);
-                                          _rec.selection = TextSelection(baseOffset: start - 2, extentOffset: end - 2);
+                                          _rec!.selection = TextSelection(baseOffset: start - 2, extentOffset: end - 2);
                                         } else {
-                                          _rec.text = before + '**' + content + '**' + after;
-                                          _rec.selection = TextSelection(baseOffset: start + 2, extentOffset: end + 2);
+                                          _rec!.text = before + '**' + content + '**' + after;
+                                          _rec!.selection = TextSelection(baseOffset: start + 2, extentOffset: end + 2);
                                         }
                                       },
                                     ),
@@ -877,27 +874,27 @@ class _EditPageState extends State<EditPage> {
                                         Icons.format_italic,
                                       ),
                                       onTap: () {
-                                        int start = _rec.selection.start;
-                                        int end = _rec.selection.end;
+                                        int start = _rec!.selection.start;
+                                        int end = _rec!.selection.end;
 
-                                        if (_rec.text[start] == '_' && _rec.text[end - 1] == '_' && start != end) {
+                                        if (_rec!.text[start] == '_' && _rec!.text[end - 1] == '_' && start != end) {
                                           start += 1;
                                           end -= 1;
-                                          _rec.selection = TextSelection(baseOffset: start, extentOffset: end);
+                                          _rec!.selection = TextSelection(baseOffset: start, extentOffset: end);
                                         }
 
-                                        final before = _rec.text.substring(0, _rec.selection.start);
-                                        final content = _rec.text.substring(_rec.selection.start, _rec.selection.end);
-                                        final after = _rec.text.substring(_rec.selection.end);
+                                        final before = _rec!.text.substring(0, _rec!.selection.start);
+                                        final content = _rec!.text.substring(_rec!.selection.start, _rec!.selection.end);
+                                        final after = _rec!.text.substring(_rec!.selection.end);
 
                                         if (before.endsWith('_') && after.startsWith('_')) {
-                                          _rec.text =
+                                          _rec!.text =
                                               before.substring(0, before.length - 1) + content + after.substring(1);
 
-                                          _rec.selection = TextSelection(baseOffset: start - 1, extentOffset: end - 1);
+                                          _rec!.selection = TextSelection(baseOffset: start - 1, extentOffset: end - 1);
                                         } else {
-                                          _rec.text = before + '_' + content + '_' + after;
-                                          _rec.selection = TextSelection(baseOffset: start + 1, extentOffset: end + 1);
+                                          _rec!.text = before + '_' + content + '_' + after;
+                                          _rec!.selection = TextSelection(baseOffset: start + 1, extentOffset: end + 1);
                                         }
                                       },
                                     ),
@@ -919,7 +916,7 @@ class _EditPageState extends State<EditPage> {
 
 /*   int maxLines = 0;
   _updateMaxLines() {
-    int newMaxLines = _rec.text.split('\n').length + 3;
+    int newMaxLines = _rec!.text.split('\n').length + 3;
     if (newMaxLines < 10) newMaxLines = 10;
     if (newMaxLines != maxLines) {
       setState(() {

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:app/external_package/preference/preference_service.dart';
 import 'package:app/utils/yaml.dart';
-import 'package:front_matter/front_matter.dart' as fm;
+import '../external_package/front_matter/front_matter.dart' as fm;
 
 import 'package:app/model/note.dart';
 

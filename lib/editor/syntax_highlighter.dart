@@ -1,12 +1,10 @@
-import 'dart:ui';
-
 import 'package:app/external_package/rich_editor/syntaxt_highlighter_base.dart';
 import 'package:flutter/material.dart';
 
 class NotelessSyntaxHighlighter implements SyntaxHighlighterBase {
-  Color accentColor;
+  Color? accentColor;
 
-  Map styles;
+  Map? styles;
 
   init(Color accentColor) {
     this.accentColor = accentColor;
@@ -38,17 +36,6 @@ class NotelessSyntaxHighlighter implements SyntaxHighlighterBase {
   NotelessSyntaxHighlighter({this.accentColor});
 
   @override
-  TextEditingValue addTextRemotely(TextEditingValue oldValue, String newText) {
-    return null;
-  }
-
-  @override
-  TextEditingValue onBackSpacePress(
-      TextEditingValue oldValue, TextSpan currentSpan) {
-    return null;
-  }
-
-  @override
   TextEditingValue onEnterPress(TextEditingValue oldValue) {
     int oldStart = oldValue.selection.start;
 
@@ -66,13 +53,10 @@ class NotelessSyntaxHighlighter implements SyntaxHighlighterBase {
       if (befLine.length <= 2) {
         if (trimSpace == 0) {
           var newValue = oldValue.copyWith(
-            text: bef.substring(0, oldStart - 3) +
-                '\n\n' +
-                oldValue.text.substring(oldStart + 1),
+            text: bef.substring(0, oldStart - 3) + '\n\n' + oldValue.text.substring(oldStart + 1),
             composing: TextRange(start: -1, end: -1),
             selection: TextSelection.fromPosition(
-              TextPosition(
-                  affinity: TextAffinity.upstream, offset: bef.length - 1),
+              TextPosition(affinity: TextAffinity.upstream, offset: bef.length - 1),
             ),
           );
 
@@ -84,8 +68,7 @@ class NotelessSyntaxHighlighter implements SyntaxHighlighterBase {
                 oldValue.text.substring(oldStart + 1),
             composing: TextRange(start: -1, end: -1),
             selection: TextSelection.fromPosition(
-              TextPosition(
-                  affinity: TextAffinity.upstream, offset: bef.length - 2),
+              TextPosition(affinity: TextAffinity.upstream, offset: bef.length - 2),
             ),
           );
 
@@ -103,63 +86,61 @@ class NotelessSyntaxHighlighter implements SyntaxHighlighterBase {
         text: bef + '\n$sym \n' + oldValue.text.substring(oldStart + 1),
         composing: TextRange(start: -1, end: -1),
         selection: TextSelection.fromPosition(
-          TextPosition(
-              affinity: TextAffinity.upstream,
-              offset: bef.length + 3 + trimSpace),
+          TextPosition(affinity: TextAffinity.upstream, offset: bef.length + 3 + trimSpace),
         ),
       );
 
       return newValue;
     }
 
-    return null;
-
-    int start = oldStart;
-
-    int breakCount = 0;
-
-    while (start > 0) {
-      start--;
-      if (oldValue.text[start] == '\n') {
-        if (breakCount >= 1) break;
-        breakCount++;
-      }
-    }
-    if (start != 0) start++;
-
-    String startOfLine = oldValue.text.substring(
-      start,
-    );
-    final before = oldValue.text.substring(0, oldStart);
-
-    print(startOfLine.substring(0, 10));
-
-    if (startOfLine.startsWith('- ')) {
-      int length = 1;
-
-      if (startOfLine.startsWith('- ')) length++;
-/*       _rec.text = before + startOfLine.substring(1).trimLeft();
-      _rec.selection = TextSelection(
-          baseOffset: oldStart - length, extentOffset: oldStart - length); */
-      var newValue = oldValue.copyWith(
-        text: before + '- \n' + oldValue.text,
-        composing: TextRange(start: -1, end: -1),
-        selection: TextSelection.fromPosition(
-          TextPosition(
-              affinity: TextAffinity.upstream, offset: before.length + 2),
-        ),
-      );
-
-      return newValue;
-    } else {}
     return oldValue;
+
+//     int start = oldStart;
+
+//     int breakCount = 0;
+
+//     while (start > 0) {
+//       start--;
+//       if (oldValue.text[start] == '\n') {
+//         if (breakCount >= 1) break;
+//         breakCount++;
+//       }
+//     }
+//     if (start != 0) start++;
+
+//     String startOfLine = oldValue.text.substring(
+//       start,
+//     );
+//     final before = oldValue.text.substring(0, oldStart);
+
+//     print(startOfLine.substring(0, 10));
+
+//     if (startOfLine.startsWith('- ')) {
+//       int length = 1;
+
+//       if (startOfLine.startsWith('- ')) length++;
+// /*       _rec.text = before + startOfLine.substring(1).trimLeft();
+//       _rec.selection = TextSelection(
+//           baseOffset: oldStart - length, extentOffset: oldStart - length); */
+//       var newValue = oldValue.copyWith(
+//         text: before + '- \n' + oldValue.text,
+//         composing: TextRange(start: -1, end: -1),
+//         selection: TextSelection.fromPosition(
+//           TextPosition(
+//               affinity: TextAffinity.upstream, offset: before.length + 2),
+//         ),
+//       );
+
+//       return newValue;
+//     } else {}
+//     return oldValue;
   }
 
   @override
   List<TextSpan> parseText(TextEditingValue tev) {
     var texts = tev.text.split('\n');
 
-    var lsSpans = List<TextSpan>();
+    var lsSpans = <TextSpan>[];
 
     bool inCodeBlock = false;
 
@@ -170,7 +151,7 @@ class NotelessSyntaxHighlighter implements SyntaxHighlighterBase {
 
       if (text.startsWith('```')) {
         inCodeBlock = !inCodeBlock;
-        lsSpans.add(TextSpan(text: text, style: styles['4']));
+        lsSpans.add(TextSpan(text: text, style: styles!['4']));
         /*   if (text.endsWith(' ')) {
           lsSpans.add(TextSpan(text: ' '));
         } */
@@ -251,115 +232,59 @@ class NotelessSyntaxHighlighter implements SyntaxHighlighterBase {
 
       // Star
 
-      String s = text.replaceAllMapped(
-          RegExp(r'(?<![\w\*])\*[^\*]+\*(?![\w\*])'),
-          (match) =>
-              '<nless-format-tmp>1' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      String s = text.replaceAllMapped(RegExp(r'(?<![\w\*])\*[^\*]+\*(?![\w\*])'),
+          (match) => '<nless-format-tmp>1' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
-      s = s.replaceAllMapped(
-          RegExp(r'(?<!\*)\*\*[^\*]+\*\*(?!\*)'),
-          (match) =>
-              '<nless-format-tmp>2' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'(?<!\*)\*\*[^\*]+\*\*(?!\*)'),
+          (match) => '<nless-format-tmp>2' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
-      s = s.replaceAllMapped(
-          RegExp(r'(?<!\*)\*\*\*[^\*]+\*\*\*(?!\*)'),
-          (match) =>
-              '<nless-format-tmp>3' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'(?<!\*)\*\*\*[^\*]+\*\*\*(?!\*)'),
+          (match) => '<nless-format-tmp>3' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
       // Underscore
 
-      s = s.replaceAllMapped(
-          RegExp(r'(?<![\w_])_[^_]+_(?![\w_])'),
-          (match) =>
-              '<nless-format-tmp>1' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'(?<![\w_])_[^_]+_(?![\w_])'),
+          (match) => '<nless-format-tmp>1' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
-      s = s.replaceAllMapped(
-          RegExp(r'(?<!_)__[^_]+__(?!_)'),
-          (match) =>
-              '<nless-format-tmp>2' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'(?<!_)__[^_]+__(?!_)'),
+          (match) => '<nless-format-tmp>2' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
-      s = s.replaceAllMapped(
-          RegExp(r'(?<!_)___[^_]+___(?!_)'),
-          (match) =>
-              '<nless-format-tmp>3' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'(?<!_)___[^_]+___(?!_)'),
+          (match) => '<nless-format-tmp>3' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
       // Strikethrough
 
-      s = s.replaceAllMapped(
-          RegExp(r'~~[^~]+~~'),
-          (match) =>
-              '<nless-format-tmp>6' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'~~[^~]+~~'),
+          (match) => '<nless-format-tmp>6' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
       // Inline Code
 
-      s = s.replaceAllMapped(
-          RegExp(r'\`[^\`]+\`'),
-          (match) =>
-              '<nless-format-tmp>4' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'\`[^\`]+\`'),
+          (match) => '<nless-format-tmp>4' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
       // Divider ---
 
-      s = s.replaceAllMapped(
-          RegExp(r'^---$'),
-          (match) =>
-              '<nless-format-tmp>7' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'^---$'),
+          (match) => '<nless-format-tmp>7' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
-      s = s.replaceAllMapped(
-          RegExp(r'^\*\*\*$'),
-          (match) =>
-              '<nless-format-tmp>7' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'^\*\*\*$'),
+          (match) => '<nless-format-tmp>7' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
       // KaTeX
 
-      s = s.replaceAllMapped(
-          RegExp(r'(?<![\w\$])\$[^\$]+\$(?![\w\$])'),
-          (match) =>
-              '<nless-format-tmp>4' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'(?<![\w\$])\$[^\$]+\$(?![\w\$])'),
+          (match) => '<nless-format-tmp>4' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
-      s = s.replaceAllMapped(
-          RegExp(r'\$\$[^\$]+\$\$'),
-          (match) =>
-              '<nless-format-tmp>4' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'\$\$[^\$]+\$\$'),
+          (match) => '<nless-format-tmp>4' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
       // AsciiMath
 
-      s = s.replaceAllMapped(
-          RegExp(r'(?<![\w&])&[^&]+&(?![\w&])'),
-          (match) =>
-              '<nless-format-tmp>4' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'(?<![\w&])&[^&]+&(?![\w&])'),
+          (match) => '<nless-format-tmp>4' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
-      s = s.replaceAllMapped(
-          RegExp(r'&&[^&]+&&'),
-          (match) =>
-              '<nless-format-tmp>4' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'&&[^&]+&&'),
+          (match) => '<nless-format-tmp>4' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
       // Wiki-Style note links like [[Note]]
 
@@ -373,12 +298,8 @@ class NotelessSyntaxHighlighter implements SyntaxHighlighterBase {
 
       // Emojis
 
-      s = s.replaceAllMapped(
-          RegExp(r'(?<![\w:]):[^:]+:(?![\w:])'),
-          (match) =>
-              '<nless-format-tmp>4' +
-              match.input.substring(match.start, match.end) +
-              '<nless-format-tmp>0');
+      s = s.replaceAllMapped(RegExp(r'(?<![\w:]):[^:]+:(?![\w:])'),
+          (match) => '<nless-format-tmp>4' + match.input.substring(match.start, match.end) + '<nless-format-tmp>0');
 
       // Links
 
@@ -391,8 +312,7 @@ class NotelessSyntaxHighlighter implements SyntaxHighlighterBase {
         }
         String title = str.substring(1).split(']').first;
 
-        out +=
-            '<nless-format-tmp>7[<nless-format-tmp>0$title<nless-format-tmp>7]';
+        out += '<nless-format-tmp>7[<nless-format-tmp>0$title<nless-format-tmp>7]';
 
         str = str.substring(title.length + 2);
 
@@ -404,7 +324,7 @@ class NotelessSyntaxHighlighter implements SyntaxHighlighterBase {
       s = '0$s';
 
       for (var part in s.split('<nless-format-tmp>')) {
-        TextStyle style = styles[part[0]];
+        TextStyle style = styles![part[0]];
 
         lsSpans.add(TextSpan(
           text: part.substring(1),
@@ -417,11 +337,26 @@ class NotelessSyntaxHighlighter implements SyntaxHighlighterBase {
         } */
       }
 
-
       if (i < texts.length) {
         lsSpans.add(TextSpan(text: '\n'));
       }
     });
     return lsSpans;
+  }
+
+  @override
+  TextEditingValue addTextRemotely(TextEditingValue oldValue, String newText) {
+    return oldValue.copyWith(
+      text: oldValue.text + newText,
+      selection: TextSelection.collapsed(offset: oldValue.text.length + newText.length),
+    );
+  }
+
+  @override
+  TextEditingValue onBackSpacePress(TextEditingValue oldValue, TextSpan currentSpan) {
+    return oldValue.copyWith(
+      text: oldValue.text.substring(0, oldValue.text.length - 1),
+      selection: TextSelection.collapsed(offset: oldValue.text.length - 1),
+    );
   }
 }
