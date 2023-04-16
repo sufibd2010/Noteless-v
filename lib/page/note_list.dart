@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:app/external_package/preference/preference_service.dart';
 import 'package:app/page/qr_scanner.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:app/model/note.dart';
 import 'package:app/page/edit.dart';
@@ -12,6 +14,7 @@ import 'package:app/store/notes.dart';
 import 'package:app/store/persistent.dart';
 import 'package:package_info/package_info.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quick_actions/quick_actions.dart';
 // import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -299,14 +302,7 @@ class _NoteListPageState extends State<NoteListPage> {
                 child: Scrollbar(
                   child: ListView(
                     children: <Widget>[
-                      TextButton(
-                          onPressed: () async {
-                            await Permission.storage.isDenied.then((value) =>
-                                Permission.storage.request().then((value) => print("sagol " + value.toString())));
-                            // await Permission.storage.request().then((value) => print("sagol " + value.toString()));
-                            // await checkPermission();
-                          },
-                          child: Text("Check Permission")),
+                 
                       if (_syncing) ...[
                         LinearProgressIndicator(),
                         Padding(

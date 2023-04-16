@@ -4,8 +4,8 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:app/external_package/preference/preferences.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,6 +21,7 @@ class QrScanner extends StatefulWidget {
 
 class _QrScannerState extends State<QrScanner> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  final Dio dio = Dio();
   QRViewController controller;
   Barcode result;
   bool get isDendronModeEnabled => PrefService.getBool('dendron_mode') ?? false;
@@ -40,29 +41,28 @@ class _QrScannerState extends State<QrScanner> {
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
+    controller.scannedDataStream.listen((scanData) async {
       print("Scan Data:::${scanData.code}");
       debugPrint("${scanData.code}");
-      setState(() {
-        result = scanData;
-      });
-      downloadFile();
-      // if (scanData.code.contains(Constants.downloadURL) &&
-      //     (result == null || !result.code.contains(Constants.downloadURL))) {
-      //   setState(() {
-      //     result = scanData;
-      //   });
-      //   downloadFile();
-      // } else if (result == null) {
-      //   Fluttertoast.showToast(
-      //       msg: "Invalid download URL: ${scanData.code}",
-      //       toastLength: Toast.LENGTH_SHORT,
-      //       gravity: ToastGravity.CENTER,
-      //       timeInSecForIosWeb: 1,
-      //       backgroundColor: Colors.red,
-      //       textColor: Colors.white,
-      //       fontSize: 16.0);
-      // }
+
+      if (scanData.code.contains(Constants.downloadURL) &&
+          (result == null || !result.code.contains(Constants.downloadURL))) {
+        setState(() {
+          result = scanData;
+        });
+        print("Download URL:::${result.code}");
+        await downloadFile();
+        Navigator.pop(context);
+      } else if (result == null) {
+        Fluttertoast.showToast(
+            msg: "Invalid download URL: ${scanData.code}",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
     });
   }
 
@@ -80,18 +80,16 @@ class _QrScannerState extends State<QrScanner> {
       debugPrint("Path:::$_path");
       try {
         String _dateFormat = DateFormat("dd-MM-yyyy-HH:mm").format(DateTime.now());
-        final taskId = await FlutterDownloader.enqueue(
-          url: result.code,
-          savedDir: _path,
-          fileName: "Skolarbook_$_dateFormat",
-          showNotification: true, // show download progress in status bar (for Android)
-          openFileFromNotification: true, // click on notification to open downloaded file (for Android)
-          saveInPublicStorage: false,
-        );
-        debugPrint("RES::::: $taskId");
-        Navigator.pop(context);
-
-        //   FlutterDownloader.retry(taskId: taskId);
+        await dio.download(result.code, "$_path/Skolarbook_$_dateFormat.md").then((value) {
+          Fluttertoast.showToast(
+              msg: "Downloaded Successfully",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.green,
+              textColor: Colors.white,
+              fontSize: 16.0);
+        });
       } catch (e) {
         print(e);
       }
@@ -128,38 +126,32 @@ class _QrScannerState extends State<QrScanner> {
     }
   }
 
-  static void downloadCallback(String id, DownloadTaskStatus status, int progress) {
-    debugPrint('Background Isolate Callback: task ($id) is in status ($status) and process ($progress)');
-    final SendPort send = IsolateNameServer.lookupPortByName('downloader_send_port');
-    send.send([id, status, progress]);
-  }
-
   void _unbindBackgroundIsolate() {
     IsolateNameServer.removePortNameMapping('downloader_send_port');
   }
 
   Future<bool> checkPermission() async {
-    if (Platform.isAndroid) {
-      final status = await Permission.storage.status;
-      print("Status:::$status");
-      if (status != PermissionStatus.granted) {
-        final result = await Permission.storage.request();
-        if (result == PermissionStatus.granted) {
-          return true;
-        }
-      } else {
-        return true;
-      }
-    } else {
-      return true;
-    }
-    return false;
+    return true;
+    // if (Platform.isAndroid) {
+    //   final status = await Permission.storage.status;
+    //   print("Status:::$status");
+    //   if (status != PermissionStatus.granted) {
+    //     final result = await Permission.storage.request();
+    //     if (result == PermissionStatus.granted) {
+    //       return true;
+    //     }
+    //   } else {
+    //     return true;
+    //   }
+    // } else {
+    //   return true;
+    // }
+    // return false;
   }
 
   @override
   void initState() {
     super.initState();
-    FlutterDownloader.registerCallback(downloadCallback);
   }
 
   @override
@@ -171,6 +163,11 @@ class _QrScannerState extends State<QrScanner> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          TextButton(
+              onPressed: () async {
+                await downloadFile();
+              },
+              child: Text('Download')),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 45),
             height: 400,
@@ -258,5 +255,5 @@ class _QrScannerState extends State<QrScanner> {
 }
 
 class Constants {
-  static const downloadURL = "https://skolarbook.org";
+  static const downloadURL = "http://skolarbook.org";
 }
