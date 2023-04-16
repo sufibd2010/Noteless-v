@@ -34,7 +34,8 @@ main() async {
   runApp(
     ChangeNotifierProvider<ThemeNotifier>(
       create: (_) => ThemeNotifier(),
-      child: App(),
+      child:
+       App(),
     ),
   );
 }

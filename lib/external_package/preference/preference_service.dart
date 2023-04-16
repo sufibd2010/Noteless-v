@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PrefService {
-  static SharedPreferences sharedPreferences;
+  static SharedPreferences? sharedPreferences;
   static String prefix = '';
 
   static bool _justCache = false;
 
-  static Map<String, dynamic> cache;
+  static Map<String, dynamic>? cache;
 
   static Future<bool> init({String prefix = ''}) async {
     if (sharedPreferences != null) return false;
@@ -22,17 +22,17 @@ class PrefService {
 
   static void setDefaultValues(Map<String, dynamic> values) {
     for (String key in values.keys) {
-      if (sharedPreferences.containsKey(prefix + key)) continue;
+      if (sharedPreferences!.containsKey(prefix + key)) continue;
       var val = values[key];
       if (val is bool) {
-        sharedPreferences.setBool(prefix + key, val);
+        sharedPreferences!.setBool(prefix + key, val);
       } else if (val is double) {
-        sharedPreferences.setDouble(prefix + key, val);
+        sharedPreferences!.setDouble(prefix + key, val);
       } else if (val is int) {
-        sharedPreferences.setInt(prefix + key, val);
+        sharedPreferences!.setInt(prefix + key, val);
       } else if (val is String) {
-        sharedPreferences.setString(prefix + key, val);
-      } else if (val is List<String>) sharedPreferences.setStringList(key, val);
+        sharedPreferences!.setString(prefix + key, val);
+      } else if (val is List<String>) sharedPreferences!.setStringList(key, val);
     }
   }
 
@@ -41,113 +41,112 @@ class PrefService {
     if (key.startsWith('!')) {
       bool val;
       if (_justCache && !ignoreCache) {
-        val = cache[prefix + key.substring(1)];
+        val = cache![prefix + key.substring(1)];
       } else {
-        val = sharedPreferences.getBool('$prefix${key.substring(1)}');
+        val = sharedPreferences!.getBool('$prefix${key.substring(1)}')!;
       }
-      if (val == null) return null;
       return !val;
     }
     if (_justCache && !ignoreCache) {
-      return cache['$prefix$key'];
+      return cache!['$prefix$key'];
     } else {
-      return sharedPreferences.getBool('$prefix$key');
+      return sharedPreferences!.getBool('$prefix$key')!;
     }
   }
 
   static setBool(String key, bool val) {
     checkInit();
     if (_justCache) {
-      cache['$prefix$key'] = val;
+      cache!['$prefix$key'] = val;
     } else {
-      sharedPreferences.setBool('$prefix$key', val);
+      sharedPreferences!.setBool('$prefix$key', val);
     }
   }
 
   static String getString(String key, {bool ignoreCache = false}) {
     checkInit();
     if (_justCache && !ignoreCache) {
-      return cache['$prefix$key'];
+      return cache!['$prefix$key'];
     } else {
-      return sharedPreferences.getString('$prefix$key');
+      return sharedPreferences!.getString('$prefix$key')!;
     }
   }
 
   static setString(String key, String val) {
     checkInit();
     if (_justCache) {
-      cache['$prefix$key'] = val;
+      cache!['$prefix$key'] = val;
     } else {
-      sharedPreferences.setString('$prefix$key', val);
+      sharedPreferences!.setString('$prefix$key', val);
     }
   }
 
   static int getInt(String key, {bool ignoreCache = false}) {
     checkInit();
     if (_justCache && !ignoreCache) {
-      return cache['$prefix$key'];
+      return cache!['$prefix$key'];
     } else {
-      return sharedPreferences.getInt('$prefix$key');
+      return sharedPreferences!.getInt('$prefix$key')!;
     }
   }
 
   static setInt(String key, int val) {
     checkInit();
     if (_justCache) {
-      cache['$prefix$key'] = val;
+      cache!['$prefix$key'] = val;
     } else {
-      sharedPreferences.setInt('$prefix$key', val);
+      sharedPreferences!.setInt('$prefix$key', val);
     }
   }
 
   static double getDouble(String key, {bool ignoreCache = false}) {
     checkInit();
     if (_justCache && !ignoreCache) {
-      return cache['$prefix$key'];
+      return cache!['$prefix$key'];
     } else {
-      return sharedPreferences.getDouble('$prefix$key');
+      return sharedPreferences!.getDouble('$prefix$key')!;
     }
   }
 
   static setDouble(String key, double val) {
     checkInit();
     if (_justCache) {
-      cache['$prefix$key'] = val;
+      cache!['$prefix$key'] = val;
     } else {
-      sharedPreferences.setDouble('$prefix$key', val);
+      sharedPreferences!.setDouble('$prefix$key', val);
     }
   }
 
   static List<String> getStringList(String key, {bool ignoreCache = false}) {
     checkInit();
     if (_justCache && !ignoreCache) {
-      return cache['$prefix$key'];
+      return cache!['$prefix$key'];
     } else {
-      return sharedPreferences.getStringList('$prefix$key');
+      return sharedPreferences!.getStringList('$prefix$key')!;
     }
   }
 
   static setStringList(String key, List<String> val) {
     checkInit();
     if (_justCache) {
-      cache['$prefix$key'] = val;
+      cache!['$prefix$key'] = val;
     } else {
-      sharedPreferences.setStringList('$prefix$key', val);
+      sharedPreferences!.setStringList('$prefix$key', val);
     }
   }
 
   static get(String key, {bool ignoreCache = false}) {
     checkInit();
     if (_justCache && !ignoreCache) {
-      return cache['$prefix$key'];
+      return cache!['$prefix$key'];
     } else {
-      return sharedPreferences.get('$prefix$key');
+      return sharedPreferences!.get('$prefix$key');
     }
   }
 
   static Set<String> getKeys() {
     checkInit();
-    return sharedPreferences.getKeys();
+    return sharedPreferences!.getKeys();
   }
 
   static Map subs = {};
@@ -174,8 +173,7 @@ class PrefService {
 
   static checkInit() {
     if (sharedPreferences == null && !_justCache) {
-      throw Exception(
-          '''\n
+      throw Exception('''\n
   PrefService not initialized.
   Call await PrefService.init() before any other PrefService call.
           
@@ -190,8 +188,8 @@ class PrefService {
   static void rebuildCache() {
     cache = {};
 
-    for (String key in sharedPreferences.getKeys()) {
-      cache[key] = sharedPreferences.get(key);
+    for (String key in sharedPreferences!.getKeys()) {
+      cache![key] = sharedPreferences!.get(key);
     }
   }
 
@@ -205,24 +203,24 @@ class PrefService {
 
   static void applyCache() {
     disableCaching();
-    for (String key in cache.keys) {
-      var val = cache[key];
+    for (String key in cache!.keys) {
+      var val = cache![key];
       if (val is bool) {
-        sharedPreferences.setBool(key, val);
+        sharedPreferences!.setBool(key, val);
       } else if (val is double) {
-        sharedPreferences.setDouble(key, val);
+        sharedPreferences!.setDouble(key, val);
       } else if (val is int) {
-        sharedPreferences.setInt(key, val);
+        sharedPreferences!.setInt(key, val);
       } else if (val is String) {
-        sharedPreferences.setString(key, val);
+        sharedPreferences!.setString(key, val);
       } else if (val is List<String>) {
-        sharedPreferences.setStringList(key, val);
+        sharedPreferences!.setStringList(key, val);
       }
     }
     rebuildCache();
   }
 
   static void clear() {
-    sharedPreferences.clear();
+    sharedPreferences!.clear();
   }
 }

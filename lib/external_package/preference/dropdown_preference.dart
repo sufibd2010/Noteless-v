@@ -3,23 +3,23 @@ import 'preference_service.dart';
 
 class DropdownPreference<T> extends StatefulWidget {
   final String title;
-  final String desc;
+  final String ?desc;
   final String localKey;
   final T defaultVal;
 
   final List<T> values;
-  final List<String> displayValues;
+  final List<String>? displayValues;
 
-  final Function onChange;
+  final Function? onChange;
 
-  final bool disabled;
+  final bool? disabled;
 
   DropdownPreference(
     this.title,
     this.localKey, {
     this.desc,
-    @required this.defaultVal,
-    @required this.values,
+    required this.defaultVal,
+    required this.values,
     this.displayValues,
     this.onChange,
     this.disabled = false,
@@ -54,7 +54,7 @@ In release mode, the default value ($value) will silently be used.
 
     return ListTile(
       title: Text(widget.title),
-      subtitle: widget.desc == null ? null : Text(widget.desc),
+      subtitle: widget.desc == null ? null : Text(widget.desc!),
       trailing: DropdownButton<T>(
         items: widget.values.map((var val) {
           return DropdownMenuItem<T>(
@@ -62,15 +62,15 @@ In release mode, the default value ($value) will silently be used.
             child: Text(
               widget.displayValues == null
                   ? val.toString()
-                  : widget.displayValues[widget.values.indexOf(val)],
+                  : widget.displayValues![widget.values.indexOf(val)],
               textAlign: TextAlign.end,
             ),
           );
         }).toList(),
-        onChanged: widget.disabled
+        onChanged: widget.disabled!
             ? null
             : (newVal) async {
-                onChange(newVal);
+                onChange(newVal!);
               },
         value: value,
       ),
@@ -87,6 +87,6 @@ In release mode, the default value ($value) will silently be used.
     } else if (val is bool) {
       this.setState(() => PrefService.setBool(widget.localKey, val));
     }
-    if (widget.onChange != null) widget.onChange(val);
+    if (widget.onChange != null) widget.onChange!(val);
   }
 }

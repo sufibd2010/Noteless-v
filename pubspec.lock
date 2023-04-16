@@ -187,6 +187,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.5"
+  logging:
+    dependency: transitive
+    description:
+      name: logging
+      sha256: "04094f2eb032cbb06c6f6e8d3607edcfcb0455e2bb6cbc010cb01171dcb64e6d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   markd:
     dependency: "direct main"
     description:
@@ -363,6 +371,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  pref:
+    dependency: "direct main"
+    description:
+      name: pref
+      sha256: "0d20346ebb662ac3b1bc26c5e75adf02e2646d93ac0b4e41d0cdd173d7ba298d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.7.1"
   process:
     dependency: transitive
     description:
@@ -428,7 +444,7 @@ packages:
     source: hosted
     version: "3.2.1"
   shared_preferences:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       name: shared_preferences
       sha256: "858aaa72d8f61637d64e776aca82e1c67e6d9ee07979123c5d17115031c1b13b"

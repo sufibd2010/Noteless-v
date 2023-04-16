@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class PreferenceText extends StatelessWidget {
   final String text;
 
-  final TextStyle style;
-  final Decoration decoration;
+  final TextStyle? style;
+  final Decoration? decoration;
 
-  final Widget leading;
-  final Text subtitle;
+  final Widget? leading;
+  final Text ?subtitle;
 
-  final Function onTap;
+  final Function ?onTap;
 
   final TextOverflow overflow;
 
@@ -29,7 +29,7 @@ class PreferenceText extends StatelessWidget {
       decoration: decoration,
       child: ListTile(
         leading: leading,
-        onTap: onTap,
+        onTap: onTap!(),
         title: Text(
           text,
           style: style,

@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:app/external_package/preference/preference_service.dart';
 import 'package:app/page/qr_scanner.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:app/model/note.dart';
 import 'package:app/page/edit.dart';
@@ -12,6 +14,7 @@ import 'package:app/store/notes.dart';
 import 'package:app/store/persistent.dart';
 import 'package:package_info/package_info.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quick_actions/quick_actions.dart';
 // import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -41,7 +44,8 @@ class _NoteListPageState extends State<NoteListPage> {
 
   @override
   void initState() {
-    store.currTag = widget.filterTag ?? PrefService.getString('current_tag');
+    // store.currTag = widget.filterTag ?? PrefService.getString('current_tag');
+    store.currTag = widget.filterTag ?? 'All notes';
 
     if (widget.searchText != null) {
       _searchFieldCtrl.text = widget.searchText!;
@@ -301,8 +305,28 @@ class _NoteListPageState extends State<NoteListPage> {
                     children: <Widget>[
                       TextButton(
                           onPressed: () async {
-                            await Permission.storage.isDenied.then((value) =>
-                                Permission.storage.request().then((value) => print("sagol " + value.toString())));
+                            var path = await getApplicationDocumentsDirectory();
+                            try {
+                              String _dateFormat = DateFormat("dd-MM-yyyy-HH:mm").format(DateTime.now());
+                              final taskId = await FlutterDownloader.enqueue(
+                                url:
+                                    ' http://skolarbook.org/book/Uj663ES8tfnVyNs56w4N/notes/Theme-00-Progression-Mathematiques-5eme.md',
+                                savedDir: path.path,
+                                fileName: "Skolarbook_$_dateFormat",
+                                showNotification: true, // show download progress in status bar (for Android)
+                                openFileFromNotification:
+                                    true, // click on notification to open downloaded file (for Android)
+                                saveInPublicStorage: false,
+                              );
+                              debugPrint("RES::::: $taskId");
+                              Navigator.pop(context);
+
+                              //   FlutterDownloader.retry(taskId: taskId);
+                            } catch (e) {
+                              print(e);
+                            }
+                            // await Permission.storage.isDenied.then((value) =>
+                            //     Permission.storage.request().then((value) => print("sagol " + value.toString())));
                             // await Permission.storage.request().then((value) => print("sagol " + value.toString()));
                             // await checkPermission();
                           },
@@ -325,9 +349,11 @@ class _NoteListPageState extends State<NoteListPage> {
                               width: 16,
                             ),
                             DropdownButton<dynamic>(
-                              value: PrefService.getString('sort_key') != null
-                                  ? PrefService.getString('sort_key')
-                                  : 'title',
+                              value:
+                                  // PrefService.getString('sort_key') != null
+                                  //     ? PrefService.getString('sort_key')
+                                  //     :
+                                  'title',
                               underline: Container(),
                               onChanged: (key) {
                                 PrefService.setString('sort_key', key.toString());
@@ -353,14 +379,15 @@ class _NoteListPageState extends State<NoteListPage> {
                             ),
                             InkWell(
                               child: Icon(
-                                (PrefService.getBool('sort_direction_asc'))
-                                    ? Icons.keyboard_arrow_down
-                                    : Icons.keyboard_arrow_up,
+                                // (PrefService.getBool('sort_direction_asc'))
+                                //     ?
+                                //     Icons.keyboard_arrow_down
+                                //     :
+                                Icons.keyboard_arrow_up,
                                 size: 32,
                               ),
                               onTap: () {
-                                PrefService.setBool(
-                                    'sort_direction_asc', !(PrefService.getBool('sort_direction_asc')));
+                                PrefService.setBool('sort_direction_asc', !(PrefService.getBool('sort_direction_asc')));
 
                                 _filterAndSortNotes();
                               },
@@ -390,7 +417,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                 ),
                               )
                             : Slidable(
-                               child: ListTile(
+                                child: ListTile(
                                   selected: _selectedNotes.contains(note.title),
                                   title: Text(note.title!),
                                   subtitle: store.isDendronModeEnabled
@@ -456,49 +483,92 @@ class _NoteListPageState extends State<NoteListPage> {
                                     });
                                   },
                                 ),
-                                startActionPane:ActionPane(
+                                startActionPane: ActionPane(
                                   motion: const ScrollMotion(),
-                               children:  <Widget>[
-                                  if (note.deleted) ...[
-                                    SlidableAction(
-                                       label: 'Delete',
-                                      backgroundColor: Colors.red,
-                                      icon: Icons.delete_forever,
-                                      onPressed: (e) async {
-                                        if (await showDialog(
-                                                context: context,
-                                                builder: (context) => AlertDialog(
-                                                      title: Text('Do you really want to delete this note?'),
-                                                      content: Text('This will delete it permanently.'),
-                                                      actions: <Widget>[
-                                                        TextButton(
-                                                          child: Text('Cancel'),
-                                                          onPressed: () {
-                                                            Navigator.of(context).pop(false);
-                                                          },
-                                                        ),
-                                                        TextButton(
-                                                          child: Text('Delete'),
-                                                          onPressed: () {
-                                                            Navigator.of(context).pop(true);
-                                                          },
-                                                        )
-                                                      ],
-                                                    )) ??
-                                            false) {
-                                          store.allNotes!.remove(note);
-                                          PersistentStore.deleteNote(note);
+                                  children: <Widget>[
+                                    if (note.deleted) ...[
+                                      SlidableAction(
+                                        label: 'Delete',
+                                        backgroundColor: Colors.red,
+                                        icon: Icons.delete_forever,
+                                        onPressed: (e) async {
+                                          if (await showDialog(
+                                                  context: context,
+                                                  builder: (context) => AlertDialog(
+                                                        title: Text('Do you really want to delete this note?'),
+                                                        content: Text('This will delete it permanently.'),
+                                                        actions: <Widget>[
+                                                          TextButton(
+                                                            child: Text('Cancel'),
+                                                            onPressed: () {
+                                                              Navigator.of(context).pop(false);
+                                                            },
+                                                          ),
+                                                          TextButton(
+                                                            child: Text('Delete'),
+                                                            onPressed: () {
+                                                              Navigator.of(context).pop(true);
+                                                            },
+                                                          )
+                                                        ],
+                                                      )) ??
+                                              false) {
+                                            store.allNotes!.remove(note);
+                                            PersistentStore.deleteNote(note);
+
+                                            await _filterAndSortNotes();
+                                          }
+                                        },
+                                      ),
+                                      SlidableAction(
+                                        label: 'Restore',
+                                        backgroundColor: Colors.redAccent,
+                                        icon: MdiIcons.deleteRestore,
+                                        onPressed: (e) async {
+                                          note.deleted = false;
+
+                                          PersistentStore.saveNote(note);
 
                                           await _filterAndSortNotes();
-                                        }
+                                        },
+                                      ),
+                                    ],
+                                    if (!note.deleted)
+                                      SlidableAction(
+                                        label: 'Trash',
+                                        backgroundColor: Colors.red,
+                                        icon: Icons.delete,
+                                        onPressed: (e) async {
+                                          note.deleted = true;
+
+                                          PersistentStore.saveNote(note);
+
+                                          await _filterAndSortNotes();
+                                        },
+                                      ),
+                                  ],
+                                ),
+                                endActionPane: ActionPane(
+                                  motion: const ScrollMotion(),
+                                  children: <Widget>[
+                                    SlidableAction(
+                                      label: note.favorited ? 'Unstar' : 'Star',
+                                      backgroundColor: Colors.yellow,
+                                      icon: note.favorited ? MdiIcons.starOff : MdiIcons.star,
+                                      onPressed: (e) async {
+                                        note.favorited = !note.favorited;
+
+                                        PersistentStore.saveNote(note);
+
+                                        await _filterAndSortNotes();
                                       },
                                     ),
                                     SlidableAction(
-                                      label: 'Restore',
-                                      backgroundColor: Colors.redAccent,
-                                      icon: MdiIcons.deleteRestore,
+                                      label: note.pinned ? 'Unpin' : 'Pin',
+                                      backgroundColor: Colors.green,
+                                      icon: note.pinned ? MdiIcons.pinOff : MdiIcons.pin,
                                       onPressed: (e) async {
-                                        note.deleted = false;
+                                        note.pinned = !note.pinned;
 
                                         PersistentStore.saveNote(note);
 
@@ -506,53 +576,8 @@ class _NoteListPageState extends State<NoteListPage> {
                                       },
                                     ),
                                   ],
-                                  if (!note.deleted)
-                                    SlidableAction(
-                                      label: 'Trash',
-                                      backgroundColor: Colors.red,
-                                      icon: Icons.delete,
-                                      onPressed: (e) async {
-                                        note.deleted = true;
-
-                                        PersistentStore.saveNote(note);
-
-                                        await _filterAndSortNotes();
-                                      },
-                                    ),
-                                ],
                                 ),
-                                endActionPane:
-                                ActionPane(
-                                  motion: const ScrollMotion(),
-                               children:  <Widget>[
-                                  SlidableAction(
-                                    label: note.favorited ? 'Unstar' : 'Star',
-                                    backgroundColor: Colors.yellow,
-                                    icon: note.favorited ? MdiIcons.starOff : MdiIcons.star,
-                                    onPressed: (e) async {
-                                      note.favorited = !note.favorited;
-
-                                      PersistentStore.saveNote(note);
-
-                                      await _filterAndSortNotes();
-                                    },
-                                  ),
-                                  SlidableAction(
-                                    label: note.pinned ? 'Unpin' : 'Pin',
-                                    backgroundColor: Colors.green,
-                                    icon: note.pinned ? MdiIcons.pinOff : MdiIcons.pin,
-                                    onPressed: (e) async {
-                                      note.pinned = !note.pinned;
-
-                                      PersistentStore.saveNote(note);
-
-                                      await _filterAndSortNotes();
-                                    },
-                                  ),
-                                ],
-                             
                               ),
-                              ),  
                     ],
                   ),
                 ),
@@ -741,7 +766,7 @@ class _NoteListPageState extends State<NoteListPage> {
                                                           ),
                                                         ],
                                                       ));
-                                              if ((newTag ).length > 0) {
+                                              if ((newTag).length > 0) {
                                                 print('ADD');
                                                 await _modifyAll((Note note) async {
                                                   note.tags.add(newTag);
@@ -884,7 +909,8 @@ class _NoteListPageState extends State<NoteListPage> {
                   ),
                 ),
               ),
-        drawer: store.shownNotes!.isNotEmpty ? Drawer(
+        drawer: store.shownNotes != null && store.shownNotes!.isNotEmpty
+            ? Drawer(
                 child: ListView(
                 children: <Widget>[
                   ListTile(
@@ -951,7 +977,8 @@ class _NoteListPageState extends State<NoteListPage> {
                     _filterAndSortNotes();
                   }, icon: Icons.delete),
                 ],
-              )) : Container(),
+              ))
+            : Container(),
       ),
     );
   }

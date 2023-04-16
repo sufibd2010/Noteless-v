@@ -3,13 +3,13 @@ import 'preference_service.dart';
 
 class RadioPreference<T> extends StatefulWidget {
   final String title;
-  final String desc;
+  final String? desc;
   final T val;
   final String localGroupKey;
   final bool selected;
   final bool isDefault;
 
-  final Function onSelect;
+  final Function ?onSelect;
   final bool ignoreTileTap;
 
   final bool disabled;
@@ -33,7 +33,7 @@ class RadioPreference<T> extends StatefulWidget {
 }
 
 class _RadioPreferenceState<T> extends State<RadioPreference<T>> {
-  BuildContext context;
+  late BuildContext context;
 
   @override
   initState() {
@@ -63,8 +63,8 @@ class _RadioPreferenceState<T> extends State<RadioPreference<T>> {
     return ListTile(
       title: Text(widget.title),
       leading: widget.leading,
-      subtitle: widget.desc == null ? null : Text(widget.desc),
-      trailing: Radio(
+      subtitle: widget.desc == null ? null : Text(widget.desc!),
+      trailing: Radio<T>(
         value: widget.val,
         groupValue: PrefService.get(widget.localGroupKey),
         onChanged: widget.disabled ? null : (var val) => onChange(widget.val),
@@ -87,6 +87,6 @@ class _RadioPreferenceState<T> extends State<RadioPreference<T>> {
     }
     PrefService.notify(widget.localGroupKey);
 
-    if (widget.onSelect != null) widget.onSelect();
+    if (widget.onSelect != null) widget.onSelect!();
   }
 }

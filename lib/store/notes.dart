@@ -13,12 +13,11 @@ class NotesStore {
   String subDirectoryAttachments = ; */
 
   String get subDirectoryNotes => isDendronModeEnabled ? '' : '/notes';
-  String get subDirectoryAttachments =>
-      isDendronModeEnabled ? '/assets' : '/attachments';
+  String get subDirectoryAttachments => isDendronModeEnabled ? '/assets' : '/attachments';
 
-  bool get isDendronModeEnabled => PrefService.getBool('dendron_mode') != null
-      ? PrefService.getBool('dendron_mode')
-      : false;
+  bool get isDendronModeEnabled =>
+      // PrefService.getBool('dendron_mode') != null ? PrefService.getBool('dendron_mode') : false;
+      false;
 
   Directory? notesDir, attachmentsDir;
 
@@ -36,22 +35,21 @@ class NotesStore {
   }
 
   void init() {
-    syncMethod = PrefService.getString('sync')!=null?PrefService.getString('sync'):'';
+    // syncMethod = PrefService.getString('sync')!=null?PrefService.getString('sync'):'';
+    syncMethod = 'webdav';
   }
 
   Future createTutorialNotes() async {
     for (String fileName in Samples.tutorialNotes) {
-      File('${notesDir!.path}/$fileName').writeAsStringSync(
-          await rootBundle.loadString('assets/tutorial/notes/$fileName'));
+      File('${notesDir!.path}/$fileName')
+          .writeAsStringSync(await rootBundle.loadString('assets/tutorial/notes/$fileName'));
     }
   }
 
   Future createTutorialAttachments() async {
     for (String fileName in Samples.tutorialAttachments) {
-      File('${attachmentsDir!.path}/$fileName').writeAsBytesSync(
-          (await rootBundle.load('assets/tutorial/attachments/$fileName'))
-              .buffer
-              .asUint8List());
+      File('${attachmentsDir!.path}/$fileName')
+          .writeAsBytesSync((await rootBundle.load('assets/tutorial/attachments/$fileName')).buffer.asUint8List());
     }
   }
 
@@ -61,12 +59,11 @@ class NotesStore {
     applicationDocumentsDirectory = await getApplicationDocumentsDirectory();
     Directory directory;
 
-    if (PrefService.getBool('notable_external_directory_enabled')) {
-      directory =
-          Directory(PrefService.getString('notable_external_directory'));
-    } else {
-      directory = applicationDocumentsDirectory!;
-    }
+    // if (PrefService.getBool('notable_external_directory_enabled')) {
+    //   directory = Directory(PrefService.getString('notable_external_directory'));
+    // } else {
+    directory = applicationDocumentsDirectory!;
+    // }
     PrefService.setString('notable_directory', directory.path);
 
     // print(isDendronModeEnabled);
@@ -118,8 +115,7 @@ class NotesStore {
               if (isSubDirectory) note.tags.add('#$dir');
             }
             if (isDendronModeEnabled) {
-              var path = entity.path
-                  .substring(notesDir!.path.length, entity.path.length - 3);
+              var path = entity.path.substring(notesDir!.path.length, entity.path.length - 3);
               while (path.startsWith('/')) {
                 path = path.substring(1);
               }
@@ -130,8 +126,7 @@ class NotesStore {
           }
         } catch (e, st) {
           final note = Note();
-          note.title =
-              'ERROR - "$e" on parsing "${entity.path.split('/notes/').last}"';
+          note.title = 'ERROR - "$e" on parsing "${entity.path.split('/notes/').last}"';
 
           note.created = DateTime.now();
           note.modified = note.created;
@@ -177,8 +172,7 @@ class NotesStore {
   }
 
   List<String> getSubTags(String forTag) {
-    Set<String> subTags =
-        allTags.where((tag) => tag.startsWith(forTag) && tag != forTag).toSet();
+    Set<String> subTags = allTags.where((tag) => tag.startsWith(forTag) && tag != forTag).toSet();
 
     subTags = subTags.map((String t) => t.replaceFirst('$forTag/', '')).toSet();
 
@@ -186,7 +180,7 @@ class NotesStore {
 
     final subTagsList = subTags.toList();
 
-    if (PrefService.getBool('sort_tags_in_sidebar') ) {
+    if (PrefService.getBool('sort_tags_in_sidebar')) {
       subTagsList.sort();
     }
 
@@ -199,8 +193,7 @@ class NotesStore {
     shownNotes = _filterByTag(allNotes!, currentTag);
 
     if (searchText != null) {
-      List keywords =
-          searchText!.split(' ').map((s) => s.toLowerCase()).toList();
+      List keywords = searchText!.split(' ').map((s) => s.toLowerCase()).toList();
 
       if (PrefService.getBool('search_content')) {
         List<String> toRemove = [];
@@ -237,7 +230,7 @@ class NotesStore {
       } else {
         int value = 0;
 
-        switch (PrefService.getString('sort_key') !=null ? PrefService.getString('sort_key') : 'title' ) {
+        switch (PrefService.getString('sort_key') != null ? PrefService.getString('sort_key') : 'title') {
           case 'title':
             value = a.title!.compareTo(b.title!);
             break;
@@ -248,7 +241,7 @@ class NotesStore {
             value = a.modified!.compareTo(b.modified!);
             break;
         }
-        if (!(PrefService.getBool('sort_direction_asc') )) value *= -1;
+        if (!(PrefService.getBool('sort_direction_asc'))) value *= -1;
 
         return value;
       }

@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 
 class ThemeNotifier with ChangeNotifier {
   ThemeNotifier() {
-    Color _accentColor = Color(PrefService.getInt('theme_color') !=null ?PrefService.getInt('theme_color'): 0xff21d885);
-    updateTheme(PrefService.getString('theme')!=null ?PrefService.getString('theme'):'light');
+    Color _accentColor = Color(0xff21d885);
+    // Color _accentColor =
+    //     PrefService.getInt('theme_color') != null ? Color(PrefService.getInt('theme_color')) : Color(0xff21d885);
+    updateTheme('light');
 
-    
+    // updateTheme(PrefService.getString('theme') != null ? PrefService.getString('theme') : 'light');
   }
 
   ThemeType currentTheme = ThemeType.light;
@@ -29,8 +31,7 @@ class ThemeNotifier with ChangeNotifier {
         break;
     }
     _currentThemeData = ThemeData(
-      brightness:
-          currentTheme == ThemeType.light ? Brightness.light : Brightness.dark,
+      brightness: currentTheme == ThemeType.light ? Brightness.light : Brightness.dark,
       scaffoldBackgroundColor: theme == 'black' ? Colors.black : null,
       backgroundColor: theme == 'black' ? Colors.black : null,
       dialogBackgroundColor: theme == 'black' ? Colors.black : null,
@@ -57,7 +58,8 @@ class ThemeNotifier with ChangeNotifier {
 
   ThemeData get currentThemeData => _currentThemeData;
 
-  Color _accentColor = Color(PrefService.getInt('theme_color') !=null ?PrefService.getInt('theme_color'): 0xff21d885);
+  // Color _accentColor = Color(PrefService.getInt('theme_color'));
+  Color _accentColor = Color(0xff21d885);
 
   Color get accentColor => _accentColor;
   set accentColor(Color color) {

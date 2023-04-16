@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class PreferenceTitle extends StatelessWidget {
   final String title;
   final double leftPadding;
-  final TextStyle style;
+  final TextStyle? style;
 
   PreferenceTitle(this.title, {this.leftPadding = 10.0, this.style});
   @override
@@ -12,7 +12,7 @@ class PreferenceTitle extends StatelessWidget {
       padding: EdgeInsets.only(left: leftPadding, bottom: 0.0, top: 20.0),
       child: Text(
         title,
-        style: style ??
+        style: style != null? style :
             TextStyle(
                 color: Theme.of(context).accentColor,
                 fontWeight: FontWeight.bold),

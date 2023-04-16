@@ -20,6 +20,7 @@ dependencies:
   # bsdiff: ^0.1.0
   device_info: ^2.0.3
   file_picker: ^5.2.9
+  pref: ^2.7.1
   flutter:
     sdk: flutter
   flutter_downloader: ^1.10.2
@@ -38,6 +39,7 @@ dependencies:
   permission_handler: ^10.2.0
   provider: ^6.0.5
   qr_code_scanner: ^1.0.1
+  shared_preferences: ^2.1.0
   #   path: "./Plugins/qr_code_scanner"
   # qr_bar_code_scanner_dialog: ^0.0.5
   quick_actions: ^1.0.2
@@ -47,8 +49,8 @@ dependencies:
   webview_flutter: ^4.0.7
   yaml: ^3.1.1
 
-dependency_overrides:
-  shared_preferences: ^2.0.4
+# dependency_overrides:
+#   shared_preferences: ^2.0.4
 # dev_dependencies:
 # flutter_launcher_icons: ^0.8.1
 flutter_icons:
