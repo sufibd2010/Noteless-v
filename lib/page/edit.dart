@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:app/editor/pairer.dart';
 import 'package:app/editor/syntax_highlighter.dart';
+import 'package:app/external_package/bsdiff.dart';
 import 'package:app/external_package/preference/preference_service.dart';
 import 'package:app/external_package/rich_editor/rich_code_controller.dart';
 import 'package:app/external_package/rich_editor/rich_code_field.dart';
@@ -14,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:markd/markdown.dart' as markd;
 
-import 'package:bsdiff/bsdiff.dart';
 import 'package:app/page/preview.dart';
 import 'package:app/store/notes.dart';
 import 'package:app/store/persistent.dart';
@@ -32,7 +32,7 @@ class EditPage extends StatefulWidget {
 
 class _EditPageState extends State<EditPage> {
   NotesStore get store => widget.store;
-  RichCodeEditingController?_rec;
+  RichCodeEditingController? _rec;
   NotelessSyntaxHighlighter _syntaxHighlighterBase = NotelessSyntaxHighlighter();
 
   GlobalKey _richTextFieldState = GlobalKey();
@@ -70,8 +70,11 @@ class _EditPageState extends State<EditPage> {
 
     _rec!.addListener(() {
       if (_rec!.text == currentData) return;
-
-      var diff = bsdiff(utf8.encode(_rec!.text), utf8.encode(currentData));
+      List<int> textData = utf8.encode(_rec!.text);
+      List<int> changedData = utf8.encode(currentData);
+      Uint8List textDataUint8 = Uint8List.fromList(textData);
+      Uint8List currentDataUint8 = Uint8List.fromList(changedData);
+      Uint8List diff = bsdiff(textDataUint8, currentDataUint8);
 
       history.add(diff);
       cursorHistory.add(_rec!.selection.start);
@@ -104,8 +107,8 @@ class _EditPageState extends State<EditPage> {
     currentData = _rec!.text;
 
     //_updateMaxLines();
-    if (PrefService.getBool('editor_mode_switcher') ) {
-      if (PrefService.getBool('editor_mode_switcher_is_preview') ) {
+    if (PrefService.getBool('editor_mode_switcher')) {
+      if (PrefService.getBool('editor_mode_switcher_is_preview')) {
         setState(() {
           _previewEnabled = true;
         });
@@ -203,7 +206,7 @@ class _EditPageState extends State<EditPage> {
 
     await PersistentStore.saveNote(note!, currentData);
 
- oldFile.deleteSync();
+    oldFile.deleteSync();
   }
 
   @override
@@ -222,7 +225,7 @@ class _EditPageState extends State<EditPage> {
                     children: <Widget>[
                       Text(note!.title!),
                       Text(
-                        note!.file!.path.substring(store.notesDir.path.length + 1),
+                        note!.file!.path.substring(store.notesDir!.path.length + 1),
                         style: TextStyle(
                           fontSize: 12,
                         ),
@@ -300,13 +303,13 @@ class _EditPageState extends State<EditPage> {
                       String fileName = fullFileName.substring(0, dotIndex);
                       String fileEnding = fullFileName.substring(dotIndex);
 
-                      File newFile = File(store.attachmentsDir.path + '/' + fullFileName);
+                      File newFile = File(store.attachmentsDir!.path + '/' + fullFileName);
 
                       int i = 0;
 
                       while (newFile.existsSync()) {
                         i++;
-                        newFile = File(store.attachmentsDir.path + '/' + fileName + ' ($i)' + fileEnding);
+                        newFile = File(store.attachmentsDir!.path + '/' + fileName + ' ($i)' + fileEnding);
                       }
                       await file.copy(newFile.path);
 
@@ -361,7 +364,7 @@ class _EditPageState extends State<EditPage> {
                                 ],
                               ));
                       if (remove) {
-                        File file = File(store.attachmentsDir.path + '/' + attachment);
+                        File file = File(store.attachmentsDir!.path + '/' + attachment);
                         await file.delete();
                         note!.attachments.remove(attachment);
                       }
@@ -431,7 +434,7 @@ class _EditPageState extends State<EditPage> {
                                   ),
                                 ],
                               ));
-                      if (remove ) {
+                      if (remove) {
                         print('REMOVE');
                         note!.tags.remove(tag);
                         store.updateTagList();
@@ -585,13 +588,9 @@ class _EditPageState extends State<EditPage> {
                                       fontFamily: 'FiraMono',
                                       fontFamilyFallback: ['monospace'],
                                       color: Theme.of(context).colorScheme.onSurface),
-                                  inputFormatters: [
-                                    CharacterPair(PrefService.getBool('editor_pair_brackets'))
-                                  ],
+                                  inputFormatters: [CharacterPair(PrefService.getBool('editor_pair_brackets'))],
                                   textCapitalization: TextCapitalization.sentences,
-                                 
                                   syntaxHighlighter: _syntaxHighlighterBase,
-                                
                                   cursorColor: Theme.of(context).accentColor,
                                   /* onChanged: (str) {
                                       }, */
@@ -599,11 +598,10 @@ class _EditPageState extends State<EditPage> {
                                           (TextEditingValue oldValue) {}, */
                                   onEnterPress: (TextEditingValue oldValue) {
                                     if (PrefService.getBool('auto_bullet_points')) {
-                                          var result = _syntaxHighlighterBase.onEnterPress(oldValue);
-                                          _rec!.value = result;
-                                        }
+                                      var result = _syntaxHighlighterBase.onEnterPress(oldValue);
+                                      _rec!.value = result;
+                                    }
                                   },
-                                  
                                 ),
                               ),
                             ),
@@ -850,7 +848,8 @@ class _EditPageState extends State<EditPage> {
                                         int end = _rec!.selection.end;
 
                                         final before = _rec!.text.substring(0, _rec!.selection.start);
-                                        final content = _rec!.text.substring(_rec!.selection.start, _rec!.selection.end);
+                                        final content =
+                                            _rec!.text.substring(_rec!.selection.start, _rec!.selection.end);
                                         final after = _rec!.text.substring(_rec!.selection.end);
 
                                         if (before.endsWith('**') && after.startsWith('**')) {
@@ -884,7 +883,8 @@ class _EditPageState extends State<EditPage> {
                                         }
 
                                         final before = _rec!.text.substring(0, _rec!.selection.start);
-                                        final content = _rec!.text.substring(_rec!.selection.start, _rec!.selection.end);
+                                        final content =
+                                            _rec!.text.substring(_rec!.selection.start, _rec!.selection.end);
                                         final after = _rec!.text.substring(_rec!.selection.end);
 
                                         if (before.endsWith('_') && after.startsWith('_')) {
