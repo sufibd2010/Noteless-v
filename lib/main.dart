@@ -5,6 +5,7 @@ import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 
 import 'package:app/page/note_list.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +27,10 @@ main() async {
   if (androidDeviceInfo.version.sdkInt < 20) {
     previewFeatureEnabled = false;
   }
-
+  await FlutterDownloader.initialize(
+      // ignoreSsl: true,
+      debug: true // optional: set to false to disable printing logs to console (default: true)
+      );
   runApp(
     ChangeNotifierProvider<ThemeNotifier>(
       create: (_) => ThemeNotifier(),

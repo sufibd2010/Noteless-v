@@ -17,40 +17,34 @@ environment:
   sdk: ">=2.5.0 <3.0.0"
 
 dependencies:
+  bsdiff: ^0.1.0
+  device_info: ^2.0.0
+  file_picker: ^3.0.0
   flutter:
     sdk: flutter
+  flutter_downloader: 1.7.1
   flutter_markdown: ^0.4.2
-  path_provider: ^2.0.0
-  yaml: ^2.2.0
-  material_design_icons_flutter: ^4.0.5045
+  flutter_slidable: ^0.5.4
+  fluttertoast: ^8.0.9
+  front_matter: ^1.1.0
+  html: ^0.14.0+2
+  intl: ^0.17.0
   markd:
     git: https://github.com/redsolver/markd.git
-  # flutter_widget_from_html: ^0.3.3
-  bsdiff: ^0.1.0
-  # webview_flutter:
-  #   path: "./webview_flutter-1.0.1"
-  webview_flutter: ^4.0.7
-  # flutter_i18n: ^0.7.0
-  # preferences: ^5.2.0
-  html: ^0.14.0+2
-  url_launcher: ^6.0.2
+  material_design_icons_flutter: ^4.0.5045
   package_info: ^0.4.0+8
-
-  provider: ^4.0.5+1
-
-  front_matter: ^1.1.0
-  flutter_slidable: ^0.5.4
-  #time_machine: ^0.9.9
-  file_picker: ^3.0.0
-  # rich_code_editor:
-  #   git: https://github.com/bats64mgutsi/rich_code_editor.git
-  device_info: ^2.0.0
-  quick_actions: ^0.4.0+8
-  # receive_sharing_intent: any
-  quiver: ^3.0.0
-  intl: ^0.17.0
+  path_provider: ^2.0.0
   permission_handler: ^6.1.0
+  provider: ^4.0.5+1
+  qr_code_scanner: ^1.0.1
+  #   path: "./Plugins/qr_code_scanner"
+  # qr_bar_code_scanner_dialog: ^0.0.5
+  quick_actions: ^0.4.0+8
+  quiver: ^3.0.0
+  url_launcher: ^6.0.2
   uuid: ^3.0.3
+  webview_flutter: ^4.0.7
+  yaml: ^2.2.0
 
 dependency_overrides:
   shared_preferences: ^2.0.4

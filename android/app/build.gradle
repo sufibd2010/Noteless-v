@@ -47,7 +47,7 @@ android {
 
     defaultConfig {
         applicationId "net.redsolver.noteless"
-        minSdkVersion 19
+        minSdkVersion 20
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

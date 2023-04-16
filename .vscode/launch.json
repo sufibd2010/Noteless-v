@@ -1,0 +1,65 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "noteless",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "noteless (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "noteless (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "webview_flutter-1.0.1",
+            "cwd": "webview_flutter-1.0.1",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "webview_flutter-1.0.1 (profile mode)",
+            "cwd": "webview_flutter-1.0.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "webview_flutter-1.0.1 (release mode)",
+            "cwd": "webview_flutter-1.0.1",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "qr_code_scanner",
+            "cwd": "Plugins/qr_code_scanner",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "qr_code_scanner (profile mode)",
+            "cwd": "Plugins/qr_code_scanner",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "qr_code_scanner (release mode)",
+            "cwd": "Plugins/qr_code_scanner",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
