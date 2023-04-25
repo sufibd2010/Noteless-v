@@ -13,8 +13,7 @@ class NotesStore {
   String subDirectoryAttachments = ; */
 
   String get subDirectoryNotes => isDendronModeEnabled ? '' : '/notes';
-  String get subDirectoryAttachments =>
-      isDendronModeEnabled ? '/assets' : '/attachments';
+  String get subDirectoryAttachments => isDendronModeEnabled ? '/assets' : '/attachments';
 
   bool get isDendronModeEnabled => PrefService.getBool('dendron_mode') ?? false;
 
@@ -39,17 +38,17 @@ class NotesStore {
 
   Future createTutorialNotes() async {
     for (String fileName in Samples.tutorialNotes) {
-      File('${notesDir.path}/$fileName').writeAsStringSync(
-          await rootBundle.loadString('assets/tutorial/notes/$fileName'));
+      print('creating tutorial note $fileName');
+      print('${notesDir.path}/$fileName');
+      File('${notesDir.path}/$fileName')
+          .writeAsStringSync(await rootBundle.loadString('assets/tutorial/notes/$fileName'));
     }
   }
 
   Future createTutorialAttachments() async {
     for (String fileName in Samples.tutorialAttachments) {
-      File('${attachmentsDir.path}/$fileName').writeAsBytesSync(
-          (await rootBundle.load('assets/tutorial/attachments/$fileName'))
-              .buffer
-              .asUint8List());
+      File('${attachmentsDir.path}/$fileName')
+          .writeAsBytesSync((await rootBundle.load('assets/tutorial/attachments/$fileName')).buffer.asUint8List());
     }
   }
 
@@ -60,8 +59,7 @@ class NotesStore {
     Directory directory;
 
     if (PrefService.getBool('notable_external_directory_enabled') ?? false) {
-      directory =
-          Directory(PrefService.getString('notable_external_directory'));
+      directory = Directory(PrefService.getString('notable_external_directory'));
     } else {
       directory = applicationDocumentsDirectory;
     }
@@ -74,16 +72,26 @@ class NotesStore {
     PrefService.setString('notable_notes_directory', notesDir.path);
 
     if (!notesDir.existsSync()) {
+      print('creating notes dir');
       notesDir.createSync();
-      if (!isDendronModeEnabled) await createTutorialNotes();
+      print('created notes dir');
+      if (!isDendronModeEnabled) {
+        await createTutorialNotes();
+        print('created tutorial notes');
+      }
     }
 
     attachmentsDir = Directory('${directory.path}$subDirectoryAttachments');
     PrefService.setString('notable_attachments_directory', attachmentsDir.path);
 
     if (!attachmentsDir.existsSync()) {
+      print('creating attachments dir');
       attachmentsDir.createSync();
-      if (!isDendronModeEnabled) await createTutorialAttachments();
+      print('created attachments dir');
+      if (!isDendronModeEnabled) {
+        await createTutorialAttachments();
+        print('created tutorial attachments');
+      }
     }
 
     /* for (String fileName in Samples.tutorialNotes) {
@@ -116,8 +124,7 @@ class NotesStore {
               if (isSubDirectory) note.tags.add('#$dir');
             }
             if (isDendronModeEnabled) {
-              var path = entity.path
-                  .substring(notesDir.path.length, entity.path.length - 3);
+              var path = entity.path.substring(notesDir.path.length, entity.path.length - 3);
               while (path.startsWith('/')) {
                 path = path.substring(1);
               }
@@ -128,8 +135,7 @@ class NotesStore {
           }
         } catch (e, st) {
           final note = Note();
-          note.title =
-              'ERROR - "$e" on parsing "${entity.path.split('/notes/').last}"';
+          note.title = 'ERROR - "$e" on parsing "${entity.path.split('/notes/').last}"';
 
           note.created = DateTime.now();
           note.modified = note.created;
@@ -175,8 +181,7 @@ class NotesStore {
   }
 
   List<String> getSubTags(String forTag) {
-    Set<String> subTags =
-        allTags.where((tag) => tag.startsWith(forTag) && tag != forTag).toSet();
+    Set<String> subTags = allTags.where((tag) => tag.startsWith(forTag) && tag != forTag).toSet();
 
     subTags = subTags.map((String t) => t.replaceFirst('$forTag/', '')).toSet();
 
@@ -197,8 +202,7 @@ class NotesStore {
     shownNotes = _filterByTag(allNotes, currentTag);
 
     if (searchText != null) {
-      List keywords =
-          searchText.split(' ').map((s) => s.toLowerCase()).toList();
+      List keywords = searchText.split(' ').map((s) => s.toLowerCase()).toList();
 
       if (PrefService.getBool('search_content') ?? true) {
         List<String> toRemove = [];

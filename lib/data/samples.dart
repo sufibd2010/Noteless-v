@@ -17,7 +17,7 @@ class Samples {
     '2nde-Chap-03-Equations-DS-2015-11-17-sujet.md',
     '2nde-Chap-03-Equations-DS-2019-11-09-Sujet.md',
     '2nde-Chap-03-Equations-Exos-Equivalences.md',
-    '2nde-Chap-03-Equations-Exos-Problèmes-Concrets.md',
+    '2nde-Chap-03-Equations-Exos-Problemes-Concrets.md',
     '2nde-Chap-03-Equations-Exos.md',
     '2nde-Chap-04-Fonctions-1-Introduction-Calculatrice.md',
     '2nde-Chap-04-Fonctions-1-Introduction-Cours.md',
