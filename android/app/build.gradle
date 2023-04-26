@@ -54,18 +54,18 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
-//    signingConfigs {
-//        release {
-//            keyAlias keystoreProperties['keyAlias']
-//            keyPassword keystoreProperties['keyPassword']
-//            storeFile file(keystoreProperties['storeFile'])
-//            storePassword keystoreProperties['storePassword']
-//        }
-//    }
+   signingConfigs {
+         release {
+        keyAlias 'key'
+        keyPassword 'hR3!bj'
+        storeFile file('/Users/sufi/Documents/GitHub/Noteless-v/key.jks')
+        storePassword 'hR3!bj'
+      }
+   }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+          signingConfig signingConfigs.release
         }
     }
 }

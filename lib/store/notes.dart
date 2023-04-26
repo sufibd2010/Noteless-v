@@ -65,8 +65,6 @@ class NotesStore {
     }
     PrefService.setString('notable_directory', directory.path);
 
-    // print(isDendronModeEnabled);
-
     notesDir = Directory('${directory.path}$subDirectoryNotes');
 
     PrefService.setString('notable_notes_directory', notesDir.path);
